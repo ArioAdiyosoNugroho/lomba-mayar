@@ -1,0 +1,27 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Dark Leaflet popup */
+.leaflet-popup-content-wrapper {
+  background: #1f2937 !important;
+  color: white !important;
+  border: 1px solid #374151;
+  border-radius: 12px !important;
+}
+.leaflet-popup-tip {
+  background: #1f2937 !important;
+}
+
+/* Smooth scrollbar */
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: #111827; }
+::-webkit-scrollbar-thumb { background: #374151; border-radius: 3px; }
+
+/* Line clamp utility */
+.line-clamp-2 {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}

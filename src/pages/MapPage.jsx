@@ -1,0 +1,375 @@
+import { useEffect, useState, useCallback, useRef } from 'react';
+import { MapContainer, TileLayer, Marker, Popup, useMapEvents } from 'react-leaflet';
+import MarkerClusterGroup from 'react-leaflet-cluster';
+import L from 'leaflet';
+import 'leaflet/dist/leaflet.css';
+import api from '../services/api';
+import { Link, useNavigate } from 'react-router-dom';
+import {
+  Filter, AlertTriangle, TreePine, Flame,
+  MapPin, ArrowRight, RefreshCw,
+} from 'lucide-react';
+
+if (!document.getElementById('map-fonts')) {
+  const l = document.createElement('link');
+  l.id = 'map-fonts'; l.rel = 'stylesheet';
+  l.href = 'https://fonts.googleapis.com/css2?family=Syne:wght@600;700;800&family=DM+Sans:wght@300;400;500;600&display=swap';
+  document.head.appendChild(l);
+}
+
+delete L.Icon.Default.prototype._getIconUrl;
+L.Icon.Default.mergeOptions({
+  iconRetinaUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon-2x.png',
+  iconUrl:       'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png',
+  shadowUrl:     'https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png',
+});
+
+const C = {
+  green:'#1b3a2b', greenMd:'#2d6a4f', lime:'#b5e235',
+  offWhite:'#f5f5f0', textDk:'#0f1a10', textMd:'#4a5544',
+  textLt:'#8a9984', border:'rgba(0,0,0,.08)',
+};
+
+const SEVERITY = {
+  low:      { color:'#3b82f6', label:'Rendah',  bg:'#eff6ff', text:'#1d4ed8' },
+  medium:   { color:'#f59e0b', label:'Sedang',  bg:'#fffbeb', text:'#b45309' },
+  high:     { color:'#f97316', label:'Tinggi',  bg:'#fff7ed', text:'#c2410c' },
+  critical: { color:'#ef4444', label:'Kritis',  bg:'#fef2f2', text:'#b91c1c' },
+};
+
+const TYPE_MAP = {
+  all:             { label:'Semua' },
+  sawit_expansion: { label:'Ekspansi Sawit' },
+  illegal_logging: { label:'Penebangan Liar' },
+  forest_fire:     { label:'Kebakaran' },
+  land_clearing:   { label:'Buka Lahan' },
+  mining:          { label:'Tambang' },
+};
+
+function coloredIcon(color) {
+  return L.divIcon({
+    className:'',
+    // Outer div = invisible hit area 44x44px (Apple HIG minimum touch target)
+    // Inner div = visible dot
+    html:`
+      <div style="
+        width:44px;height:44px;
+        display:flex;align-items:center;justify-content:center;
+        cursor:pointer;
+      ">
+        <div style="
+          width:18px;height:18px;border-radius:50%;
+          background:${color};
+          border:3px solid #fff;
+          box-shadow:0 0 0 3px ${color}44, 0 0 12px ${color}88, 0 3px 8px rgba(0,0,0,.4);
+          transition:transform .15s;
+        "></div>
+      </div>`,
+    iconSize:[44,44],
+    iconAnchor:[22,22],
+    popupAnchor:[0,-22],
+  });
+}
+
+function clusterIcon(cluster) {
+  const n = cluster.getChildCount();
+  const s = n < 5 ? 34 : n < 20 ? 42 : 50;
+  return L.divIcon({
+    className:'',
+    html:`<div style="width:${s}px;height:${s}px;border-radius:50%;background:rgba(27,58,43,.88);border:2.5px solid #b5e235;display:flex;align-items:center;justify-content:center;font-family:'Syne',sans-serif;font-weight:700;font-size:${s<38?12:14}px;color:#fff;box-shadow:0 0 0 4px rgba(181,226,53,.18),0 4px 12px rgba(0,0,0,.35)">${n}</div>`,
+    iconSize:[s,s], iconAnchor:[s/2,s/2],
+  });
+}
+
+const CSS = `
+  *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+  html,body{font-family:'DM Sans',sans-serif}
+  @keyframes spin{to{transform:rotate(360deg)}}
+
+  .sf-btn{
+    width:100%;text-align:left;display:flex;align-items:center;gap:9px;
+    font-family:'DM Sans',sans-serif;font-size:13px;font-weight:400;
+    color:${C.textMd};background:transparent;border:none;cursor:pointer;
+    padding:9px 12px;border-radius:10px;transition:background .18s,color .18s;
+  }
+  .sf-btn:hover{background:rgba(0,0,0,.05);color:${C.textDk}}
+  .sf-btn.active{background:${C.green};color:#fff;font-weight:500}
+
+  /* ── Ini yang penting: rep-item sekarang pakai <a> via Link ── */
+  .rep-item{
+    width:100%;text-align:left;background:transparent;
+    display:flex;align-items:flex-start;gap:10px;
+    padding:12px 16px;border-bottom:1px solid rgba(0,0,0,.06);
+    transition:background .18s;text-decoration:none;color:inherit;
+    cursor:pointer;
+  }
+  .rep-item:hover{background:${C.offWhite}}
+  .rep-item.sel{background:${C.offWhite};border-left:3px solid #b5e235}
+
+  .mob-pill{
+    flex-shrink:0;font-family:'DM Sans',sans-serif;font-size:12px;font-weight:500;
+    color:${C.textMd};background:#fff;border:1px solid ${C.border};
+    padding:6px 14px;border-radius:99px;cursor:pointer;white-space:nowrap;transition:background .18s,color .18s;
+  }
+  .mob-pill.active{background:${C.green};color:#fff;border-color:${C.green}}
+
+  .leaflet-popup-content-wrapper{
+    border-radius:20px!important;padding:0!important;overflow:hidden;
+    background:#1b3a2b!important;
+    box-shadow:0 16px 48px rgba(0,0,0,.35),0 4px 12px rgba(0,0,0,.2)!important;
+    border:1px solid rgba(181,226,53,.2)!important;
+  }
+  .leaflet-popup-content{margin:0!important}
+  .leaflet-popup-tip{background:#1b3a2b!important}
+  .leaflet-popup-close-button{color:rgba(255,255,255,.5)!important;font-size:18px!important;padding:8px 10px!important}
+  .leaflet-popup-close-button:hover{color:#fff!important}
+  ::-webkit-scrollbar{width:4px}
+  ::-webkit-scrollbar-thumb{background:rgba(0,0,0,.12);border-radius:99px}
+
+  @media(max-width:768px){.map-sidebar{display:none!important}.map-mob-filter{display:flex!important}}
+`;
+
+function BoundsLoader({ onBoundsChange }) {
+  const map = useMapEvents({
+    moveend: () => onBoundsChange(map.getBounds()),
+    zoomend: () => onBoundsChange(map.getBounds()),
+  });
+  return null;
+}
+
+export default function MapPage() {
+  const navigate = useNavigate();
+  const [reports,  setReports]  = useState([]);
+  const [filter,   setFilter]   = useState('all');
+  const [loading,  setLoading]  = useState(true);
+  const [selected, setSelected] = useState(null);
+  const debounceRef = useRef(null);
+
+  const fetchReports = useCallback((bounds = null) => {
+    setLoading(true);
+    const params = {};
+    if (bounds) {
+      params.lat_min = bounds.getSouth().toFixed(6);
+      params.lat_max = bounds.getNorth().toFixed(6);
+      params.lng_min = bounds.getWest().toFixed(6);
+      params.lng_max = bounds.getEast().toFixed(6);
+    }
+    api.get('/reports/map', { params }).then(r => {
+      const raw = r.data;
+      const arr = Array.isArray(raw) ? raw
+        : Array.isArray(raw?.data) ? raw.data
+        : Array.isArray(raw?.data?.data) ? raw.data.data : [];
+      setReports(arr);
+      setLoading(false);
+    }).catch(() => setLoading(false));
+  }, []);
+
+  useEffect(() => { fetchReports(); }, [fetchReports]);
+
+  const handleBoundsChange = useCallback((bounds) => {
+    if (debounceRef.current) clearTimeout(debounceRef.current);
+    debounceRef.current = setTimeout(() => fetchReports(bounds), 600);
+  }, [fetchReports]);
+
+  const filtered   = reports.filter(r => filter === 'all' || r.type === filter);
+  const critCount  = filtered.filter(r => r.severity === 'critical').length;
+
+  return (
+    <>
+      <style>{CSS}</style>
+
+      {/* Mobile filter bar */}
+      <div className="map-mob-filter" style={{ display:'none', background:'#fff', borderBottom:`1px solid ${C.border}`, padding:'10px 16px', alignItems:'center', gap:8, overflowX:'auto' }}>
+        <Filter size={13} color={C.textLt} style={{ flexShrink:0 }}/>
+        {Object.entries(TYPE_MAP).map(([key, { label }]) => (
+          <button key={key} className={`mob-pill${filter===key?' active':''}`} onClick={() => setFilter(key)}>{label}</button>
+        ))}
+      </div>
+
+      <div style={{ display:'flex', height:'calc(100vh - 80px)' }}>
+
+        {/* ── SIDEBAR ── */}
+        <aside className="map-sidebar" style={{ width:288, flexShrink:0, background:'#fff', borderRight:`1px solid ${C.border}`, display:'flex', flexDirection:'column', overflow:'hidden' }}>
+
+          {/* Header */}
+          <div style={{ background:C.green, padding:'20px 18px', display:'flex', flexDirection:'column', gap:6 }}>
+            <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between' }}>
+              <h2 style={{ fontFamily:"'Syne',sans-serif", fontWeight:700, fontSize:16, color:'#fff' }}>Peta Ancaman Hutan</h2>
+              <button onClick={() => fetchReports()} title="Refresh" style={{ background:'none', border:'none', cursor:'pointer', color:C.lime, display:'flex' }}>
+                <RefreshCw size={14} style={{ animation: loading ? 'spin 1s linear infinite' : 'none' }}/>
+              </button>
+            </div>
+            <div style={{ display:'flex', gap:12 }}>
+              <span style={{ fontFamily:"'DM Sans',sans-serif", fontSize:12, color:C.lime, fontWeight:500 }}>{filtered.length} laporan</span>
+              {critCount > 0 && (
+                <span style={{ fontFamily:"'DM Sans',sans-serif", fontSize:12, color:'#fca5a5', display:'flex', alignItems:'center', gap:4, fontWeight:500 }}>
+                  <AlertTriangle size={11}/> {critCount} kritis
+                </span>
+              )}
+            </div>
+          </div>
+
+          {/* Filters */}
+          <div style={{ padding:'12px', borderBottom:`1px solid ${C.border}` }}>
+            <p style={{ fontFamily:"'DM Sans',sans-serif", fontSize:10.5, color:C.textLt, fontWeight:600, letterSpacing:'1px', textTransform:'uppercase', padding:'2px 4px 8px' }}>Filter Jenis</p>
+            {Object.entries(TYPE_MAP).map(([key, { label }]) => (
+              <button key={key} className={`sf-btn${filter===key?' active':''}`} onClick={() => setFilter(key)}>
+                {label}
+                <span style={{ marginLeft:'auto', fontSize:11, opacity:.6 }}>
+                  {key === 'all' ? reports.length : reports.filter(r => r.type === key).length}
+                </span>
+              </button>
+            ))}
+          </div>
+
+          {/* Report list — klik langsung ke detail */}
+          <div style={{ flex:1, overflowY:'auto' }}>
+            {filtered.length === 0 ? (
+              <div style={{ padding:'32px 16px', textAlign:'center' }}>
+                <MapPin size={28} color="rgba(0,0,0,.15)" style={{ marginBottom:10 }}/>
+                <p style={{ fontFamily:"'DM Sans',sans-serif", fontSize:13, color:C.textLt }}>Tidak ada laporan</p>
+              </div>
+            ) : filtered.map(r => {
+              const sv = SEVERITY[r.severity] ?? SEVERITY.low;
+              return (
+                // ✅ Pakai Link — klik langsung navigasi ke /reports/:id
+                <Link
+                  key={r.id}
+                  to={`/reports/${r.id}`}
+                  className={`rep-item${selected?.id === r.id ? ' sel' : ''}`}
+                  onClick={() => setSelected(r)}
+                >
+                  <span style={{ width:9, height:9, borderRadius:'50%', background:sv.color, flexShrink:0, marginTop:4 }}/>
+                  <div style={{ minWidth:0, flex:1 }}>
+                    <p style={{ fontFamily:"'DM Sans',sans-serif", fontSize:12.5, fontWeight:500, color:C.textDk, lineHeight:1.4, overflow:'hidden', textOverflow:'ellipsis', display:'-webkit-box', WebkitLineClamp:2, WebkitBoxOrient:'vertical' }}>
+                      {r.title}
+                    </p>
+                    <p style={{ fontFamily:"'DM Sans',sans-serif", fontSize:11, color:C.textLt, marginTop:3 }}>
+                      {sv.label} · {TYPE_MAP[r.type]?.label ?? r.type}
+                    </p>
+                    <span style={{ display:'inline-flex', alignItems:'center', gap:3, marginTop:4, fontFamily:"'DM Sans',sans-serif", fontSize:11, color:C.greenMd, fontWeight:500 }}>
+                      Lihat detail <ArrowRight size={10}/>
+                    </span>
+                  </div>
+                </Link>
+              );
+            })}
+          </div>
+        </aside>
+
+        {/* ── MAP ── */}
+        <div style={{ flex:1, position:'relative', overflow:'hidden' }}>
+          {loading && (
+            <div style={{ position:'absolute', top:12, left:'50%', transform:'translateX(-50%)', zIndex:1000, background:'rgba(255,255,255,.92)', backdropFilter:'blur(8px)', border:`1px solid ${C.border}`, borderRadius:99, padding:'8px 20px', display:'flex', alignItems:'center', gap:10 }}>
+              <div style={{ width:16, height:16, borderRadius:'50%', border:`2px solid ${C.border}`, borderTopColor:C.greenMd, animation:'spin 1s linear infinite' }}/>
+              <span style={{ fontFamily:"'DM Sans',sans-serif", fontSize:13, color:C.textMd }}>Memuat peta…</span>
+            </div>
+          )}
+
+          <MapContainer center={[-2.5489, 118.0149]} zoom={5} style={{ height:'100%', width:'100%' }}>
+            <TileLayer
+              url="https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png"
+              attribution='&copy; CARTO'
+            />
+            <BoundsLoader onBoundsChange={handleBoundsChange} />
+
+            <MarkerClusterGroup chunkedLoading iconCreateFunction={clusterIcon} maxClusterRadius={48} spiderfyOnMaxZoom showCoverageOnHover={false} zoomToBoundsOnClick>
+              {filtered.map(r => (
+                <Marker
+                  key={r.id}
+                  position={[r.lat, r.lng]}
+                  icon={coloredIcon(SEVERITY[r.severity]?.color ?? '#6b7280')}
+                  eventHandlers={{ click: () => setSelected(r) }}
+                >
+                  <Popup>
+                    <div style={{ width:240, fontFamily:"'DM Sans',sans-serif", background:'#1b3a2b' }}>
+                      {/* Foto */}
+                      {r.photo_url && (
+                        <div style={{ position:'relative', overflow:'hidden' }}>
+                          <img src={r.photo_url} alt={r.title}
+                            style={{ width:'100%', height:130, objectFit:'cover', display:'block', opacity:.9 }}/>
+                          {/* Gradient overlay di bawah foto */}
+                          <div style={{ position:'absolute', bottom:0, left:0, right:0, height:40, background:'linear-gradient(to bottom, transparent, #1b3a2b)' }}/>
+                        </div>
+                      )}
+                      <div style={{ padding:'14px 16px 16px' }}>
+                        {/* Title */}
+                        <p style={{ fontFamily:"'Syne',sans-serif", fontWeight:700, fontSize:14, color:'#fff', lineHeight:1.35, marginBottom:10 }}>
+                          {r.title}
+                        </p>
+                        {/* Badges */}
+                        <div style={{ display:'flex', gap:7, flexWrap:'wrap', marginBottom:14 }}>
+                          {(() => {
+                            const sv = SEVERITY[r.severity] ?? SEVERITY.low;
+                            return (
+                              <span style={{
+                                display:'inline-flex', alignItems:'center', gap:5,
+                                background:'rgba(255,255,255,.1)', color:'#fff',
+                                borderRadius:99, padding:'4px 10px',
+                                fontSize:11, fontWeight:600,
+                                border:`1px solid ${sv.color}55`,
+                              }}>
+                                <span style={{ width:6, height:6, borderRadius:'50%', background:sv.color, flexShrink:0 }}/>
+                                {sv.label}
+                              </span>
+                            );
+                          })()}
+                          <span style={{
+                            background:'rgba(255,255,255,.08)', color:'rgba(255,255,255,.65)',
+                            borderRadius:99, padding:'4px 10px', fontSize:11,
+                            border:'1px solid rgba(255,255,255,.1)',
+                          }}>
+                            {TYPE_MAP[r.type]?.label ?? r.type}
+                          </span>
+                        </div>
+                        {/* CTA Button */}
+                        <Link to={`/reports/${r.id}`} style={{
+                          display:'flex', alignItems:'center', justifyContent:'center', gap:6,
+                          background:'#b5e235', color:'#0f1a10',
+                          borderRadius:12, padding:'10px 14px',
+                          fontSize:12.5, fontWeight:700, textDecoration:'none',
+                          transition:'background .2s',
+                        }}
+                        onMouseEnter={e => e.currentTarget.style.background='#c8f24d'}
+                        onMouseLeave={e => e.currentTarget.style.background='#b5e235'}
+                        >
+                          Lihat Detail <ArrowRight size={13}/>
+                        </Link>
+                      </div>
+                    </div>
+                  </Popup>
+                </Marker>
+              ))}
+            </MarkerClusterGroup>
+          </MapContainer>
+
+          {/* Stats badge */}
+          <div style={{ position:'absolute', bottom:28, left:16, zIndex:1000, background:'rgba(255,255,255,.92)', backdropFilter:'blur(10px)', border:`1px solid ${C.border}`, borderRadius:14, padding:'10px 16px', display:'flex', alignItems:'center', gap:14, boxShadow:'0 4px 20px rgba(0,0,0,.1)' }}>
+            <div style={{ textAlign:'center' }}>
+              <div style={{ fontFamily:"'Syne',sans-serif", fontSize:20, fontWeight:700, color:C.textDk, lineHeight:1 }}>{filtered.length}</div>
+              <div style={{ fontFamily:"'DM Sans',sans-serif", fontSize:10, color:C.textLt, marginTop:2 }}>laporan</div>
+            </div>
+            {critCount > 0 && <>
+              <div style={{ width:1, height:28, background:C.border }}/>
+              <div style={{ textAlign:'center' }}>
+                <div style={{ fontFamily:"'Syne',sans-serif", fontSize:20, fontWeight:700, color:'#ef4444', lineHeight:1 }}>{critCount}</div>
+                <div style={{ fontFamily:"'DM Sans',sans-serif", fontSize:10, color:C.textLt, marginTop:2 }}>kritis</div>
+              </div>
+            </>}
+          </div>
+
+          {/* Legend */}
+          <div style={{ position:'absolute', bottom:28, right:16, zIndex:1000, background:'rgba(255,255,255,.92)', backdropFilter:'blur(10px)', border:`1px solid ${C.border}`, borderRadius:14, padding:'14px 16px', boxShadow:'0 4px 20px rgba(0,0,0,.1)' }}>
+            <p style={{ fontFamily:"'DM Sans',sans-serif", fontSize:10.5, color:C.textLt, fontWeight:600, letterSpacing:'1px', textTransform:'uppercase', marginBottom:10 }}>Keparahan</p>
+            {Object.entries(SEVERITY).map(([k, v]) => (
+              <div key={k} style={{ display:'flex', alignItems:'center', gap:8, marginBottom:6 }}>
+                <span style={{ width:10, height:10, borderRadius:'50%', background:v.color, flexShrink:0 }}/>
+                <span style={{ fontFamily:"'DM Sans',sans-serif", fontSize:12.5, color:C.textMd }}>{v.label}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+    </>
+  );
+}
