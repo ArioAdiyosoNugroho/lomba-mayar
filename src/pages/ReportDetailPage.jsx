@@ -485,14 +485,6 @@ export default function ReportDetailPage() {
           </div>
         </div>
       </div>
-
-      {/* ══ MOBILE STICKY FOOTER DONASI — sama pola DonatePage ══ */}
-      <div className="mob-donate-bar">
-        <Link to="/donate" className="mob-donate-btn">
-            Tanam Pohon di Sini
-          <span className="ic"><ArrowRight size={15} color={C.lime}/></span>
-        </Link>
-      </div>
     </>
   );
 }
