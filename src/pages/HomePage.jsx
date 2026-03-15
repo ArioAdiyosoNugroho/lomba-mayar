@@ -672,25 +672,6 @@ export default function HomePage() {
 
               {/* Floating card */}
               <HeroStatsCard stats={stats}/>
-
-              {/* Live badge */}
-              <div style={{
-                position:'absolute', top:20, right:20,
-                background:'rgba(5,14,8,.68)', backdropFilter:'blur(12px)',
-                border:'1px solid rgba(181,226,53,.3)',
-                borderRadius:99, padding:'8px 16px',
-                display:'flex', alignItems:'center', gap:8,
-              }}>
-                <span style={{
-                  width:7, height:7, borderRadius:'50%',
-                  background:C.lime, display:'inline-block',
-                  animation:'pulse-lime 2s infinite',
-                }}/>
-                <span style={{
-                  fontFamily:"'DM Sans',sans-serif",
-                  fontSize:12.5, color:C.lime, fontWeight:500,
-                }}>Live Monitoring</span>
-              </div>
             </div>
           </div>
 
