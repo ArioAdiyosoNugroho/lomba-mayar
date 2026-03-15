@@ -243,12 +243,8 @@ export default function AdminDashboard() {
         <div style={{ maxWidth:1100, margin:'0 auto', position:'relative', zIndex:1 }}>
           <div style={{ height:80 }}/>
           <div className="fu d1 hero-pad" style={{ padding:'16px 60px 48px' }}>
-            <div style={{ display:'inline-flex', alignItems:'center', gap:7, background:'rgba(245,158,11,.15)', border:'1px solid rgba(245,158,11,.22)', borderRadius:99, padding:'5px 14px', marginBottom:16 }}>
-              <ShieldCheck size={12} color='#fbbf24'/>
-              <span style={{ fontFamily:"'DM Sans',sans-serif", fontSize:12, color:'#fbbf24', fontWeight:600 }}>Admin Panel</span>
-            </div>
             <h1 className="fu d1 hero-h1" style={{ fontFamily:"'Syne',sans-serif", fontWeight:800, fontSize:56, lineHeight:.96, letterSpacing:'-2.5px', color:'#fff', marginBottom:20 }}>
-              Dashboard<br/><span style={{ color:C.lime }}>Administrator</span>
+              Dashboard<br/><span style={{ color:C.lime }}>Admin</span>
             </h1>
             {dash && (
               <div className="hero-stats" style={{ display:'flex', gap:24, flexWrap:'wrap' }}>
