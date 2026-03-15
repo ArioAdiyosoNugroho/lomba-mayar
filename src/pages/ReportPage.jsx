@@ -151,12 +151,14 @@ const CSS = `
     /* Show mobile footer, hide right column */
     .mob-footer  { display:block !important; }
     .right-col   { display:none !important; }
+    /* Hide desktop-only sections */
+    .desk-cta    { display:none !important; }
 
     /* Single column */
     .report-grid { grid-template-columns:1fr !important; gap:0 !important; }
 
-    /* Spacing */
-    .page-wrap   { padding:20px 16px 120px !important; }
+    /* Spacing — 200px bottom so trust chips not hidden behind footer */
+    .page-wrap   { padding:20px 16px 200px !important; }
     .hero-wrap   { padding:16px 20px 36px !important; min-height:auto !important; }
     .hero-title  { font-size:42px !important; letter-spacing:-1.5px !important; }
     .hero-stats  { gap:20px !important; flex-wrap:wrap !important; }
