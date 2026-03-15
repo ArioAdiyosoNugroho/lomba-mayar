@@ -1,19 +1,35 @@
 import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
+import { VitePWA } from 'vite-plugin-pwa'
 
 export default defineConfig({
-  plugins: [react()],
+  plugins: [
+    react(),
+    VitePWA({
+      registerType: 'autoUpdate',
+      manifest: {
+        name: 'Forest Guardian',
+        short_name: 'ForestGuard',
+        description: 'Platform pelaporan deforestasi Indonesia',
+        theme_color: '#1b3a2b',
+        background_color: '#1b3a2b',
+        display: 'standalone',
+        start_url: '/',
+        icons: [
+          { src: '/icon-192.png', sizes: '192x192', type: 'image/png' },
+          { src: '/icon-512.png', sizes: '512x512', type: 'image/png' },
+        ]
+      }
+    })
+  ],
   server: {
     port: 5173,
-    // 1. Tambahkan ini agar domain dari localhost.run tidak diblokir
-    allowedHosts: ['.lhr.life', '.ngrok-free.app'], 
+    allowedHosts: ['.lhr.life', '.ngrok-free.app'],
     proxy: {
       '/api': {
-        // 2. GANTI localhost:8000 dengan URL Ngrok Laravel kamu
-        // Contoh: 'https://a1b2-c3d4.ngrok-free.app'
         target: 'https://imagerial-josue-electrophonically.ngrok-free.dev/api',
         changeOrigin: true,
-        rewrite: (path) => path.replace(/^\/api/, '/api'), // Memastikan path tetap benar
+        rewrite: (path) => path.replace(/^\/api/, '/api'),
       }
     }
   }
