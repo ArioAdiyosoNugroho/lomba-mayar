@@ -4,7 +4,7 @@ import toast from 'react-hot-toast';
 import {
   ShieldCheck, CheckCircle, XCircle, Clock, TreePine,
   AlertTriangle, Users, Heart, FileText, ChevronRight,
-  ArrowRight, ChevronDown,
+  ChevronDown,
 } from 'lucide-react';
 
 if (!document.getElementById('admin-fonts')) {
@@ -40,77 +40,132 @@ const DON_STATUS = {
   expired: { bg:'#f1f5f9', text:'#64748b', dot:'#94a3b8', label:'Expired'  },
 };
 
+/* Format rupiah: 8000 → Rp 8.000 */
+function fmt(n) {
+  if (n == null) return '—';
+  return 'Rp ' + Number(n).toLocaleString('id-ID');
+}
+
 const CSS = `
   *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
-  html{scroll-behavior:smooth}
-  body{font-family:'DM Sans',sans-serif;background:${C.offWhite}}
+  html{scroll-behavior:smooth;overflow-x:hidden;max-width:100vw}
+  body{font-family:'DM Sans',sans-serif;background:${C.offWhite};overflow-x:hidden;max-width:100vw}
   @keyframes fadeUp{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:translateY(0)}}
   @keyframes spin{to{transform:rotate(360deg)}}
   .fu{animation:fadeUp .6s cubic-bezier(.16,1,.3,1) both}
   .d1{animation-delay:.05s}.d2{animation-delay:.12s}.d3{animation-delay:.19s}
 
-  .tab-btn{display:flex;align-items:center;gap:6px;padding:9px 18px;border-radius:99px;border:none;font-family:'DM Sans',sans-serif;font-size:13.5px;font-weight:500;cursor:pointer;transition:all .18s;white-space:nowrap;-webkit-tap-highlight-color:transparent}
+  .tab-btn{display:flex;align-items:center;gap:6px;padding:9px 18px;border-radius:99px;border:none;
+    font-family:'DM Sans',sans-serif;font-size:13.5px;font-weight:500;cursor:pointer;
+    transition:all .18s;white-space:nowrap;-webkit-tap-highlight-color:transparent}
   .tab-btn.active{background:${C.green};color:#fff}
   .tab-btn.inactive{background:transparent;color:${C.textLt}}
   .tab-btn.inactive:hover{background:rgba(0,0,0,.05);color:${C.textDk}}
 
-  .filter-btn{padding:7px 16px;border-radius:99px;border:1.5px solid ${C.border};background:#fff;font-family:'DM Sans',sans-serif;font-size:12.5px;font-weight:500;cursor:pointer;transition:all .18s;color:${C.textLt};white-space:nowrap;-webkit-tap-highlight-color:transparent}
+  .filter-btn{padding:7px 16px;border-radius:99px;border:1.5px solid ${C.border};background:#fff;
+    font-family:'DM Sans',sans-serif;font-size:12.5px;font-weight:500;cursor:pointer;
+    transition:all .18s;color:${C.textLt};white-space:nowrap;flex-shrink:0;
+    -webkit-tap-highlight-color:transparent}
   .filter-btn.active{background:${C.green};color:#fff;border-color:${C.green}}
   .filter-btn:hover:not(.active){border-color:rgba(0,0,0,.18);color:${C.textDk}}
 
-  .stat-card{background:#fff;border-radius:18px;border:1px solid ${C.border};padding:18px;transition:transform .2s,box-shadow .2s;overflow:hidden;min-width:0}
+  .stat-card{background:#fff;border-radius:18px;border:1px solid ${C.border};
+    padding:18px;transition:transform .2s,box-shadow .2s;overflow:hidden;min-width:0}
   .stat-card:hover{transform:translateY(-2px);box-shadow:0 8px 24px rgba(0,0,0,.07)}
 
-  .rep-card{background:#fff;border-radius:18px;border:1px solid ${C.border};padding:16px 18px;transition:box-shadow .18s,border-color .18s}
+  .rep-card{background:#fff;border-radius:18px;border:1px solid ${C.border};
+    padding:16px 18px;transition:box-shadow .18s,border-color .18s}
   .rep-card:hover{box-shadow:0 6px 20px rgba(0,0,0,.06);border-color:rgba(0,0,0,.12)}
 
-  .don-row{display:flex;align-items:center;gap:12px;background:#fff;border:1px solid ${C.border};border-radius:16px;padding:13px 16px;transition:box-shadow .18s}
+  .don-row{display:flex;align-items:center;gap:12px;background:#fff;
+    border:1px solid ${C.border};border-radius:16px;padding:13px 16px;
+    transition:box-shadow .18s}
   .don-row:hover{box-shadow:0 6px 20px rgba(0,0,0,.06)}
 
-  .action-btn{padding:7px 14px;border-radius:99px;font-family:'DM Sans',sans-serif;font-size:12px;font-weight:600;border:1.5px solid ${C.border};background:#fff;color:${C.textMd};cursor:pointer;transition:all .15s;white-space:nowrap;-webkit-tap-highlight-color:transparent}
+  .action-btn{padding:8px 14px;border-radius:10px;font-family:'DM Sans',sans-serif;
+    font-size:12.5px;font-weight:600;border:1.5px solid ${C.border};background:#fff;
+    color:${C.textMd};cursor:pointer;transition:all .15s;white-space:nowrap;
+    -webkit-tap-highlight-color:transparent;flex:1;text-align:center}
   .action-btn:hover{border-color:${C.greenMd};color:${C.greenMd};background:rgba(45,106,79,.04)}
   .action-btn:active{transform:scale(.96)}
 
-  .status-badge{display:inline-flex;align-items:center;gap:4px;border-radius:99px;padding:3px 10px;font-family:'DM Sans',sans-serif;font-size:11px;font-weight:600;flex-shrink:0}
+  .status-badge{display:inline-flex;align-items:center;gap:4px;border-radius:99px;
+    padding:3px 10px;font-family:'DM Sans',sans-serif;font-size:11px;font-weight:600;flex-shrink:0}
 
   ::-webkit-scrollbar{width:4px;height:4px}
   ::-webkit-scrollbar-thumb{background:rgba(0,0,0,.12);border-radius:99px}
   .hide-scroll::-webkit-scrollbar{display:none}
-  .hide-scroll{scrollbar-width:none}
+  .hide-scroll{scrollbar-width:none;-ms-overflow-style:none}
 
-  /* ══ RESPONSIVE ══ */
+  /* ── RESPONSIVE ── */
   @media(max-width:1024px){
     .stats-grid{grid-template-columns:1fr 1fr!important}
     .overview-grid{grid-template-columns:1fr!important}
     .status-grid{grid-template-columns:1fr 1fr!important}
   }
-  @media(max-width:768px){
-    .hero-pad{padding:14px 16px 32px!important}
-    .hero-h1{font-size:34px!important;letter-spacing:-1.2px!important;line-height:1.05!important}
-    .hero-stats{gap:14px!important;flex-wrap:wrap!important}
-    .stat-val{font-size:18px!important}
-    .page-wrap{padding:16px 12px 60px!important}
-    .stats-grid{grid-template-columns:1fr 1fr!important;gap:9px!important}
-    .status-grid{grid-template-columns:1fr 1fr!important;gap:9px!important}
-    .stat-card{padding:12px!important;border-radius:14px!important}
-    .stat-card p:first-of-type{font-size:clamp(13px,3vw,20px)!important}
-    .tab-row{width:100%!important;overflow-x:auto!important}
-    .tab-btn{font-size:12.5px!important;padding:8px 13px!important}
-    .filter-row{overflow-x:auto!important;flex-wrap:nowrap!important}
-    .rep-card{padding:13px 14px!important;border-radius:14px!important}
-    .rep-img{display:none!important}
-    .rep-actions{gap:6px!important}
-    .don-row{padding:11px 13px!important;border-radius:13px!important}
-    .ov-card{border-radius:14px!important;padding:14px!important}
+
+  @media(max-width:640px){
+    /* prevent any horizontal overflow */
+    *{max-width:100%;word-break:break-word}
+
+    .hero-pad{padding:12px 14px 28px!important}
+    .hero-h1{font-size:32px!important;letter-spacing:-1px!important;line-height:1.05!important}
+    .hero-stats{gap:12px!important}
+    .stat-val{font-size:16px!important}
+
+    .page-wrap{padding:14px 10px 56px!important}
+
+    /* 2-col stat grid di mobile */
+    .stats-grid{grid-template-columns:1fr 1fr!important;gap:8px!important}
+    .stat-card{padding:11px!important;border-radius:13px!important}
+
+    /* status breakdown 2 col */
+    .status-grid{grid-template-columns:1fr 1fr!important;gap:8px!important}
+    .status-breakdown{border-radius:14px!important;padding:13px!important}
+
+    /* overview cards */
     .overview-grid{gap:10px!important}
-    .status-breakdown{border-radius:14px!important;padding:14px!important}
+    .ov-card{border-radius:14px!important;padding:13px 12px!important}
+
+    /* tab bar — scroll horizontal */
+    .tab-row{
+      width:100%!important;
+      overflow-x:auto!important;
+      display:flex!important;
+      flex-wrap:nowrap!important;
+    }
+    .tab-btn{font-size:12px!important;padding:7px 12px!important}
+
+    /* filter pills scroll */
+    .filter-row{
+      flex-wrap:nowrap!important;
+      overflow-x:auto!important;
+      padding-bottom:2px!important;
+    }
+
+    /* report cards */
+    .rep-card{padding:12px!important;border-radius:13px!important}
+    .rep-img{display:none!important}
+    .rep-title{font-size:13.5px!important}
+
+    /* donation rows */
+    .don-row{padding:10px 11px!important;border-radius:12px!important;gap:9px!important}
+    .don-email{display:none!important}
+
+    /* truncate long text in list items */
+    .truncate-mob{
+      overflow:hidden!important;
+      text-overflow:ellipsis!important;
+      white-space:nowrap!important;
+      max-width:140px!important;
+    }
   }
 `;
 
 function StatusBadge({ cfg }) {
   return (
     <span className="status-badge" style={{ background:cfg.bg, color:cfg.text }}>
-      <span style={{ width:6, height:6, borderRadius:'50%', background:cfg.dot }}/>
+      <span style={{ width:6, height:6, borderRadius:'50%', background:cfg.dot, flexShrink:0 }}/>
       {cfg.label}
     </span>
   );
@@ -122,21 +177,27 @@ function StatCard({ Icon, val, label, color, delay }) {
       <div style={{ width:32, height:32, borderRadius:9, background:color+'18', display:'flex', alignItems:'center', justifyContent:'center', marginBottom:10 }}>
         <Icon size={15} color={color}/>
       </div>
-      <p style={{ fontFamily:"'Syne',sans-serif", fontSize:'clamp(14px,3.5vw,22px)', fontWeight:800, color:C.textDk, lineHeight:1.1, marginBottom:4, wordBreak:'break-word', overflow:'hidden' }}>{val ?? '—'}</p>
+      <p style={{
+        fontFamily:"'Syne',sans-serif",
+        fontSize:'clamp(13px,3.5vw,22px)',
+        fontWeight:800, color:C.textDk, lineHeight:1.1, marginBottom:4,
+        wordBreak:'break-word', overflow:'hidden',
+      }}>{val ?? '—'}</p>
       <p style={{ fontFamily:"'DM Sans',sans-serif", fontSize:11, color:C.textLt }}>{label}</p>
     </div>
   );
 }
 
-/* Report card — mobile collapsible actions */
 function ReportCard({ r, onUpdate }) {
   const [open, setOpen] = useState(false);
   const sc  = STATUS_CFG[r.status] ?? STATUS_CFG.pending;
   const sev = SEV_CFG[r.severity]  ?? SEV_CFG.low;
+  const otherStatuses = STATUS_OPTIONS.filter(s => s !== r.status);
 
   return (
     <div className="rep-card">
       <div style={{ display:'flex', alignItems:'flex-start', gap:12 }}>
+        {/* Foto — hidden di mobile via CSS */}
         {r.photo_url && (
           <img className="rep-img" src={r.photo_url} alt=""
             style={{ width:64, height:64, objectFit:'cover', borderRadius:12, flexShrink:0, border:`1px solid ${C.border}` }}/>
@@ -145,48 +206,62 @@ function ReportCard({ r, onUpdate }) {
           <div style={{ display:'flex', alignItems:'center', gap:6, flexWrap:'wrap', marginBottom:6 }}>
             <StatusBadge cfg={sc}/>
             <span style={{ display:'flex', alignItems:'center', gap:4, fontFamily:"'DM Sans',sans-serif", fontSize:11, color:C.textLt }}>
-              <span style={{ width:6, height:6, borderRadius:'50%', background:sev.dot, display:'inline-block' }}/>{sev.label}
+              <span style={{ width:6, height:6, borderRadius:'50%', background:sev.dot, display:'inline-block', flexShrink:0 }}/>{sev.label}
             </span>
           </div>
-          <h3 style={{ fontFamily:"'Syne',sans-serif", fontSize:14.5, fontWeight:700, color:C.textDk, lineHeight:1.3, marginBottom:4 }}>{r.title}</h3>
-          <p style={{ fontFamily:"'DM Sans',sans-serif", fontSize:11.5, color:C.textLt }}>
-            {r.user?.name}{r.location_text && ` · ${r.location_text}`} · {new Date(r.created_at).toLocaleDateString('id-ID',{day:'numeric',month:'short',year:'numeric'})}
+          <h3 className="rep-title" style={{ fontFamily:"'Syne',sans-serif", fontSize:14.5, fontWeight:700, color:C.textDk, lineHeight:1.3, marginBottom:4 }}>
+            {r.title}
+          </h3>
+          {/* Meta — wrap di mobile */}
+          <p style={{
+            fontFamily:"'DM Sans',sans-serif", fontSize:11.5, color:C.textLt,
+            overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap',
+          }}>
+            {r.user?.name}
+            {r.location_text && ` · ${r.location_text}`}
+            {' · '}{new Date(r.created_at).toLocaleDateString('id-ID',{day:'numeric',month:'short',year:'numeric'})}
           </p>
           {r.description && (
-            <p style={{ fontFamily:"'DM Sans',sans-serif", fontSize:13, color:C.textMd, lineHeight:1.65, marginTop:6, display:'-webkit-box', WebkitLineClamp:2, WebkitBoxOrient:'vertical', overflow:'hidden' }}>
-              {r.description}
-            </p>
+            <p style={{
+              fontFamily:"'DM Sans',sans-serif", fontSize:13, color:C.textMd,
+              lineHeight:1.65, marginTop:6,
+              display:'-webkit-box', WebkitLineClamp:2,
+              WebkitBoxOrient:'vertical', overflow:'hidden',
+            }}>{r.description}</p>
           )}
         </div>
       </div>
 
-      {/* Actions — collapsible di mobile, selalu tampil di desktop */}
+      {/* Actions */}
       <div style={{ marginTop:12, paddingTop:10, borderTop:`1px solid ${C.border}` }}>
-        {/* Toggle button — mobile only */}
-        <button type="button" onClick={() => setOpen(v => !v)}
-          style={{ display:'none', width:'100%', alignItems:'center', justifyContent:'space-between', background:'none', border:'none', cursor:'pointer', padding:0, marginBottom: open ? 10 : 0 }}
-          className="mob-actions-toggle">
-          <style>{`@media(max-width:768px){.mob-actions-toggle{display:flex!important}.desk-actions{display:none!important}}@media(min-width:769px){.mob-actions-toggle{display:none!important}.desk-actions{display:flex!important}}`}</style>
+
+        {/* Toggle — mobile */}
+        <button
+          type="button"
+          onClick={() => setOpen(v => !v)}
+          style={{
+            width:'100%', display:'flex', alignItems:'center',
+            justifyContent:'space-between', background:'none',
+            border:'none', cursor:'pointer', padding:'2px 0',
+            marginBottom: open ? 10 : 0,
+          }}
+        >
           <span style={{ fontFamily:"'DM Sans',sans-serif", fontSize:12, color:C.textLt }}>
-            {open ? 'Tutup aksi' : 'Ubah status'}
+            {open ? 'Tutup aksi' : 'Ubah status →'}
           </span>
-          <ChevronDown size={15} color={C.textLt} style={{ transition:'transform .2s', transform:open?'rotate(180deg)':'rotate(0deg)' }}/>
+          <ChevronDown size={14} color={C.textLt}
+            style={{ transition:'transform .2s', transform: open ? 'rotate(180deg)' : 'rotate(0deg)', flexShrink:0 }}/>
         </button>
 
-        {/* Desktop — always show */}
-        <div className="desk-actions rep-actions" style={{ display:'flex', gap:7, flexWrap:'wrap', alignItems:'center' }}>
-          <p style={{ fontFamily:"'DM Sans',sans-serif", fontSize:11.5, color:C.textLt, flexShrink:0 }}>Ubah ke:</p>
-          {STATUS_OPTIONS.filter(s => s !== r.status).map(s => (
-            <button key={s} className="action-btn" onClick={() => onUpdate(r.id, s)}>{STATUS_CFG[s]?.label}</button>
-          ))}
-        </div>
-
-        {/* Mobile — collapsible */}
+        {/* Collapsible actions — grid 2 col di mobile, flex di desktop */}
         {open && (
-          <div style={{ display:'none' }} className="mob-actions-body">
-            <style>{`@media(max-width:768px){.mob-actions-body{display:grid!important;grid-template-columns:1fr 1fr;gap:8px}}`}</style>
-            {STATUS_OPTIONS.filter(s => s !== r.status).map(s => (
-              <button key={s} className="action-btn" style={{ width:'100%', textAlign:'center', padding:'10px' }}
+          <div style={{
+            display:'grid',
+            gridTemplateColumns:'repeat(auto-fill, minmax(100px, 1fr))',
+            gap:8,
+          }}>
+            {otherStatuses.map(s => (
+              <button key={s} className="action-btn"
                 onClick={() => { onUpdate(r.id, s); setOpen(false); }}>
                 {STATUS_CFG[s]?.label}
               </button>
@@ -208,19 +283,25 @@ export default function AdminDashboard() {
   const [loading,   setLoading]   = useState(true);
 
   useEffect(() => {
-    api.get('/admin/dashboard').then(r => { setDash(r.data); setLoading(false); }).catch(() => setLoading(false));
+    api.get('/admin/dashboard')
+      .then(r => { setDash(r.data); setLoading(false); })
+      .catch(() => setLoading(false));
   }, []);
 
   useEffect(() => {
     if (tab !== 'reports') return;
     const q = repFilter !== 'all' ? `?status=${repFilter}` : '';
-    api.get(`/admin/reports${q}`).then(r => setReports(r.data?.data || r.data || [])).catch(() => {});
+    api.get(`/admin/reports${q}`)
+      .then(r => setReports(r.data?.data || r.data || []))
+      .catch(() => {});
   }, [tab, repFilter]);
 
   useEffect(() => {
     if (tab !== 'donations') return;
     const q = donFilter !== 'all' ? `?status=${donFilter}` : '';
-    api.get(`/admin/donations${q}`).then(r => setDonations(r.data?.data || r.data || [])).catch(() => {});
+    api.get(`/admin/donations${q}`)
+      .then(r => setDonations(r.data?.data || r.data || []))
+      .catch(() => {});
   }, [tab, donFilter]);
 
   const updateStatus = async (id, status) => {
@@ -237,22 +318,43 @@ export default function AdminDashboard() {
 
       {/* ══ HERO ══ */}
       <div style={{ position:'relative', overflow:'hidden', background:C.green }}>
-        <img src="https://images.unsplash.com/photo-1448375240586-882707db888b?w=1400&auto=format&fit=crop&q=80" alt=""
-          style={{ position:'absolute', inset:0, width:'100%', height:'100%', objectFit:'cover', objectPosition:'center 40%', display:'block' }}/>
+        <img
+          src="https://images.unsplash.com/photo-1448375240586-882707db888b?w=1400&auto=format&fit=crop&q=80"
+          alt=""
+          style={{ position:'absolute', inset:0, width:'100%', height:'100%', objectFit:'cover', objectPosition:'center 40%', display:'block' }}
+        />
         <div style={{ position:'absolute', inset:0, background:'linear-gradient(105deg,rgba(27,58,43,.97) 0%,rgba(27,58,43,.92) 35%,rgba(27,58,43,.6) 70%,rgba(27,58,43,.2) 100%)' }}/>
+        {/* Decorative */}
+        <div style={{ position:'absolute', right:-60, top:-60, width:280, height:280, borderRadius:'50%', background:'rgba(245,158,11,.07)', pointerEvents:'none' }}/>
+        <div style={{ position:'absolute', right:120, bottom:30, width:130, height:130, borderRadius:'50%', border:'1px solid rgba(245,158,11,.12)', pointerEvents:'none' }}/>
 
         <div style={{ maxWidth:1100, margin:'0 auto', position:'relative', zIndex:1 }}>
           <div style={{ height:80 }}/>
           <div className="fu d1 hero-pad" style={{ padding:'16px 60px 48px' }}>
-            <h1 className="fu d1 hero-h1" style={{ fontFamily:"'Syne',sans-serif", fontWeight:800, fontSize:56, lineHeight:.96, letterSpacing:'-2.5px', color:'#fff', marginBottom:20 }}>
-              Dashboard<br/><span style={{ color:C.lime }}>Admin</span>
+            {/* Badge */}
+            <div style={{
+              display:'inline-flex', alignItems:'center', gap:7,
+              background:'rgba(245,158,11,.15)', border:'1px solid rgba(245,158,11,.22)',
+              borderRadius:99, padding:'5px 14px', marginBottom:16,
+            }}>
+              <ShieldCheck size={12} color='#fbbf24'/>
+              <span style={{ fontFamily:"'DM Sans',sans-serif", fontSize:12, color:'#fbbf24', fontWeight:600 }}>Admin Panel</span>
+            </div>
+
+            <h1 className="fu d1 hero-h1" style={{
+              fontFamily:"'Syne',sans-serif", fontWeight:800,
+              fontSize:56, lineHeight:.96, letterSpacing:'-2.5px',
+              color:'#fff', marginBottom:20,
+            }}>
+              Dashboard<br/><span style={{ color:C.lime }}>Administrator</span>
             </h1>
+
             {dash && (
               <div className="hero-stats" style={{ display:'flex', gap:24, flexWrap:'wrap' }}>
                 {[
                   { v:dash.users?.total ?? '—',            l:'Total Users',    c:'#60a5fa' },
                   { v:dash.reports?.pending ?? '—',        l:'Pending Review', c:'#fbbf24' },
-                  { v:dash.donations?.total_trees ?? '—',  l:'Pohon Ditanam',  c:C.lime },
+                  { v:dash.donations?.total_trees?.toLocaleString('id-ID') ?? '—', l:'Pohon Ditanam', c:C.lime },
                 ].map(({ v, l, c }) => (
                   <div key={l}>
                     <p className="stat-val" style={{ fontFamily:"'Syne',sans-serif", fontSize:22, fontWeight:800, color:c, lineHeight:1 }}>{v}</p>
@@ -270,7 +372,12 @@ export default function AdminDashboard() {
         <div className="page-wrap" style={{ maxWidth:1100, margin:'0 auto', padding:'22px 60px 80px' }}>
 
           {/* Tab bar */}
-          <div className="fu d2 tab-row hide-scroll" style={{ display:'inline-flex', gap:4, background:'#fff', border:`1px solid ${C.border}`, borderRadius:99, padding:5, marginBottom:20 }}>
+          <div className="fu d2 tab-row hide-scroll" style={{
+            display:'inline-flex', gap:4,
+            background:'#fff', border:`1px solid ${C.border}`,
+            borderRadius:99, padding:5, marginBottom:20,
+            maxWidth:'100%',
+          }}>
             {[
               { key:'overview',  label:'Overview',  Icon:FileText },
               { key:'reports',   label:'Laporan',   Icon:AlertTriangle, badge:dash?.reports?.pending },
@@ -297,10 +404,10 @@ export default function AdminDashboard() {
           {!loading && tab === 'overview' && (
             <div className="fu d3" style={{ display:'flex', flexDirection:'column', gap:12 }}>
               <div className="stats-grid" style={{ display:'grid', gridTemplateColumns:'repeat(4,1fr)', gap:10 }}>
-                <StatCard Icon={Users}         val={dash?.users?.total}                                                  label="Total Users"    color="#0ea5e9" delay="d1"/>
-                <StatCard Icon={AlertTriangle} val={dash?.reports?.pending}                                              label="Pending Review" color="#f59e0b" delay="d1"/>
-                <StatCard Icon={TreePine}      val={dash?.donations?.total_trees?.toLocaleString('id')}                  label="Pohon Ditanam"  color={C.greenMd} delay="d2"/>
-                <StatCard Icon={Heart}         val={`Rp ${((dash?.donations?.total_amount)||0).toLocaleString('id')}`}   label="Total Donasi"   color="#e11d48" delay="d2"/>
+                <StatCard Icon={Users}         val={dash?.users?.total}                                                     label="Total Users"    color="#0ea5e9" delay="d1"/>
+                <StatCard Icon={AlertTriangle} val={dash?.reports?.pending}                                                 label="Pending Review" color="#f59e0b" delay="d1"/>
+                <StatCard Icon={TreePine}      val={dash?.donations?.total_trees?.toLocaleString('id-ID')}                  label="Pohon Ditanam"  color={C.greenMd} delay="d2"/>
+                <StatCard Icon={Heart}         val={fmt(dash?.donations?.total_amount)}                                     label="Total Donasi"   color="#e11d48" delay="d2"/>
               </div>
 
               <div className="overview-grid" style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:12 }}>
@@ -308,7 +415,7 @@ export default function AdminDashboard() {
                 <div className="ov-card" style={{ background:'#fff', borderRadius:18, border:`1px solid ${C.border}`, padding:'18px 20px' }}>
                   <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', marginBottom:14 }}>
                     <p style={{ fontFamily:"'Syne',sans-serif", fontSize:14.5, fontWeight:700, color:C.textDk }}>Laporan Terbaru</p>
-                    <button onClick={() => setTab('reports')} style={{ display:'flex', alignItems:'center', gap:3, fontFamily:"'DM Sans',sans-serif", fontSize:12, color:C.greenMd, fontWeight:600, background:'none', border:'none', cursor:'pointer' }}>
+                    <button onClick={() => setTab('reports')} style={{ display:'flex', alignItems:'center', gap:3, fontFamily:"'DM Sans',sans-serif", fontSize:12, color:C.greenMd, fontWeight:600, background:'none', border:'none', cursor:'pointer', flexShrink:0 }}>
                       Lihat <ChevronRight size={12}/>
                     </button>
                   </div>
@@ -332,7 +439,7 @@ export default function AdminDashboard() {
                 <div className="ov-card" style={{ background:'#fff', borderRadius:18, border:`1px solid ${C.border}`, padding:'18px 20px' }}>
                   <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', marginBottom:14 }}>
                     <p style={{ fontFamily:"'Syne',sans-serif", fontSize:14.5, fontWeight:700, color:C.textDk }}>Donasi Terbaru</p>
-                    <button onClick={() => setTab('donations')} style={{ display:'flex', alignItems:'center', gap:3, fontFamily:"'DM Sans',sans-serif", fontSize:12, color:C.greenMd, fontWeight:600, background:'none', border:'none', cursor:'pointer' }}>
+                    <button onClick={() => setTab('donations')} style={{ display:'flex', alignItems:'center', gap:3, fontFamily:"'DM Sans',sans-serif", fontSize:12, color:C.greenMd, fontWeight:600, background:'none', border:'none', cursor:'pointer', flexShrink:0 }}>
                       Lihat <ChevronRight size={12}/>
                     </button>
                   </div>
@@ -348,7 +455,7 @@ export default function AdminDashboard() {
                             {d.user?.name ?? d.donor_name ?? 'Anonim'}
                           </p>
                           <p style={{ fontFamily:"'DM Sans',sans-serif", fontSize:11, color:C.textLt, marginTop:1 }}>
-                            {d.trees_count} pohon · {d.amount_formatted ?? `Rp ${d.amount?.toLocaleString('id')}`}
+                            {d.trees_count} pohon · {d.amount_formatted ?? fmt(d.amount)}
                           </p>
                         </div>
                         <StatusBadge cfg={ds}/>
@@ -384,7 +491,8 @@ export default function AdminDashboard() {
           {/* ══ REPORTS ══ */}
           {!loading && tab === 'reports' && (
             <div className="fu d3" style={{ display:'flex', flexDirection:'column', gap:10 }}>
-              <div className="filter-row hide-scroll" style={{ display:'flex', gap:6, flexWrap:'wrap', paddingBottom:4 }}>
+              {/* Filter scroll */}
+              <div className="filter-row hide-scroll" style={{ display:'flex', gap:6, overflowX:'auto', paddingBottom:4 }}>
                 {['all', ...STATUS_OPTIONS].map(s => (
                   <button key={s} className={`filter-btn ${repFilter===s?'active':''}`} onClick={() => setRepFilter(s)}>
                     {s === 'all' ? 'Semua' : (STATUS_CFG[s]?.label ?? s)}
@@ -407,7 +515,7 @@ export default function AdminDashboard() {
           {/* ══ DONATIONS ══ */}
           {!loading && tab === 'donations' && (
             <div className="fu d3" style={{ display:'flex', flexDirection:'column', gap:9 }}>
-              <div className="filter-row hide-scroll" style={{ display:'flex', gap:6, flexWrap:'wrap', paddingBottom:4 }}>
+              <div className="filter-row hide-scroll" style={{ display:'flex', gap:6, overflowX:'auto', paddingBottom:4 }}>
                 {['all','paid','pending','failed','expired'].map(s => (
                   <button key={s} className={`filter-btn ${donFilter===s?'active':''}`} onClick={() => setDonFilter(s)}>
                     {s === 'all' ? 'Semua' : (DON_STATUS[s]?.label ?? s)}
@@ -426,15 +534,17 @@ export default function AdminDashboard() {
                           <p style={{ fontFamily:"'DM Sans',sans-serif", fontSize:14, fontWeight:600, color:C.textDk, marginBottom:2, overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap' }}>
                             {d.user?.name ?? d.donor_name ?? 'Anonim'}
                           </p>
-                          <p style={{ fontFamily:"'DM Sans',sans-serif", fontSize:11.5, color:C.textLt }}>
+                          <p style={{ fontFamily:"'DM Sans',sans-serif", fontSize:11.5, color:C.textLt, overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap' }}>
                             {d.trees_count} pohon
-                            {(d.user?.email || d.donor_email) && ` · ${d.user?.email ?? d.donor_email}`}
+                            <span className="don-email">
+                              {(d.user?.email || d.donor_email) && ` · ${d.user?.email ?? d.donor_email}`}
+                            </span>
                             {' · '}{new Date(d.created_at).toLocaleDateString('id-ID',{day:'numeric',month:'short',year:'numeric'})}
                           </p>
                         </div>
                         <div style={{ textAlign:'right', flexShrink:0, display:'flex', flexDirection:'column', alignItems:'flex-end', gap:4 }}>
-                          <p style={{ fontFamily:"'Syne',sans-serif", fontSize:14, fontWeight:700, color:C.textDk }}>
-                            {d.amount_formatted ?? `Rp ${d.amount?.toLocaleString('id')}`}
+                          <p style={{ fontFamily:"'Syne',sans-serif", fontSize:13, fontWeight:700, color:C.textDk, whiteSpace:'nowrap' }}>
+                            {d.amount_formatted ?? fmt(d.amount)}
                           </p>
                           <StatusBadge cfg={ds}/>
                         </div>

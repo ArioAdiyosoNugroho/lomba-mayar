@@ -413,7 +413,7 @@ export default function LeaderboardPage() {
                 </div>
 
                 {/* Mobile CTA (below list) */}
-                <div className="mob-cta" style={{ display:'none', marginTop:8 }}>
+                {/* <div className="mob-cta" style={{ display:'none', marginTop:8 }}>
                   <style>{`@media(max-width:640px){.mob-cta{display:block!important}}`}</style>
                   <div style={{ background:C.green, borderRadius:18, padding:'20px',
                     position:'relative', overflow:'hidden' }}>
@@ -433,7 +433,7 @@ export default function LeaderboardPage() {
                       Donasi Pohon <span className="ic"><ArrowRight size={13} color={C.lime}/></span>
                     </Link>
                   </div>
-                </div>
+                </div> */}
 
               </div>
 
