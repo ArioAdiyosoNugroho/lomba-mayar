@@ -273,7 +273,7 @@ export default function ProfilePage() {
           }}>
             {[
               { key:'donations', label:'Riwayat Donasi', Icon:Heart    },
-              { key:'reports',   label:'Laporan Saya',   Icon:FileText },
+              { key:'reports',   label:'Laporan',   Icon:FileText },
             ].map(({ key, label, Icon }) => (
               <button key={key}
                 className={`tab-pill ${tab===key?'active':'inactive'}`}
