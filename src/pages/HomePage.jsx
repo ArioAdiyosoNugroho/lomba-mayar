@@ -498,7 +498,7 @@ export default function HomePage() {
   useEffect(() => {
     api.get('/reports/stats').then(r => setStats(r.data)).catch(() => {});
     api.get('/donations/summary').then(r => setDonation(r.data)).catch(() => {});
-    api.get('/reports?per_page=6&per_page=6').then(r => setReports(r.data.data || [])).catch(() => {});
+    api.get('/reports?per_page=6&status=verified').then(r => setReports(r.data.data || [])).catch(() => {});
   }, []);
 
   return (
