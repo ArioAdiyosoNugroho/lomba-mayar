@@ -5,7 +5,7 @@ import toast from 'react-hot-toast';
 import {
   Upload, Locate, AlertTriangle, ArrowRight,
   X, Info, MapPin, FileText, Tag, Camera,
-  ChevronDown, CheckCircle,
+  ChevronDown, TreePine,
 } from 'lucide-react';
 
 if (!document.getElementById('report-fonts')) {
@@ -16,9 +16,15 @@ if (!document.getElementById('report-fonts')) {
 }
 
 const C = {
-  green:'#1b3a2b', greenMd:'#2d6a4f', lime:'#b5e235', limeHov:'#c8f24d',
-  offWhite:'#f5f5f0', textDk:'#0f1a10', textMd:'#4a5544', textLt:'#8a9984',
-  border:'rgba(0,0,0,.08)',
+  green   : '#1b3a2b',
+  greenMd : '#2d6a4f',
+  lime    : '#b5e235',
+  limeHov : '#c8f24d',
+  offWhite: '#f5f5f0',
+  textDk  : '#0f1a10',
+  textMd  : '#4a5544',
+  textLt  : '#8a9984',
+  border  : 'rgba(0,0,0,.08)',
 };
 
 const TYPES = [
@@ -37,93 +43,151 @@ const SEVERITIES = [
   { value:'critical', label:'Kritis',  color:'#ef4444', bg:'#fef2f2' },
 ];
 
+/* ─── CSS — identik dengan DonatePage ─────────────────────── */
 const CSS = `
-  *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
-  html{scroll-behavior:smooth}
-  body{font-family:'DM Sans',sans-serif;background:${C.offWhite}}
+  *, *::before, *::after { box-sizing:border-box; margin:0; padding:0; }
+  html { scroll-behavior:smooth; }
+  body { font-family:'DM Sans',sans-serif; background:${C.offWhite}; }
 
-  @keyframes fadeUp{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
-  @keyframes spin{to{transform:rotate(360deg)}}
-  .fu{animation:fadeUp .65s cubic-bezier(.16,1,.3,1) both}
-  .d1{animation-delay:.06s}.d2{animation-delay:.14s}
+  @keyframes spin   { to { transform:rotate(360deg); } }
+  @keyframes fadeUp { from { opacity:0; transform:translateY(18px); } to { opacity:1; transform:translateY(0); } }
 
-  .f-label{display:block;font-family:'DM Sans',sans-serif;font-size:11px;font-weight:600;color:${C.textLt};letter-spacing:.6px;text-transform:uppercase;margin-bottom:7px}
-  .f-input{width:100%;background:${C.offWhite};border:2px solid ${C.border};border-radius:13px;padding:13px 16px;font-family:'DM Sans',sans-serif;font-size:15px;color:${C.textDk};outline:none;transition:border-color .18s,background .18s,box-shadow .18s;-webkit-appearance:none}
-  .f-input:focus{border-color:${C.greenMd};background:#fff;box-shadow:0 0 0 4px rgba(45,106,79,.08)}
-  .f-input::placeholder{color:${C.textLt}}
-  .f-input.err{border-color:#ef4444!important}
+  .fu  { animation:fadeUp .6s cubic-bezier(.16,1,.3,1) both; }
+  .d1  { animation-delay:.07s; }
+  .d2  { animation-delay:.16s; }
+  .d3  { animation-delay:.25s; }
 
-  /* Type button — sama style dengan pkg-card di DonatePage */
-  .type-btn{padding:12px 6px;border-radius:14px;border:2px solid ${C.border};background:#fff;cursor:pointer;text-align:center;transition:all .15s;-webkit-tap-highlight-color:transparent}
-  .type-btn:hover{border-color:${C.greenMd};transform:translateY(-1px);box-shadow:0 4px 12px rgba(0,0,0,.07)}
-  .type-btn:active{transform:scale(.95)}
-  .type-btn.active{border-color:${C.green};background:${C.green};box-shadow:0 6px 20px rgba(27,58,43,.2)}
+  /* ── form elements ── */
+  .f-label {
+    display:block; font-family:'DM Sans',sans-serif; font-size:11px; font-weight:600;
+    color:${C.textLt}; letter-spacing:.6px; text-transform:uppercase; margin-bottom:7px;
+  }
+  .f-input {
+    width:100%; background:${C.offWhite}; border:2px solid ${C.border};
+    border-radius:13px; padding:13px 16px; font-family:'DM Sans',sans-serif;
+    font-size:15px; color:${C.textDk}; outline:none;
+    transition:border-color .18s, background .18s, box-shadow .18s;
+    -webkit-appearance:none;
+  }
+  .f-input:focus  { border-color:${C.greenMd}; background:#fff; box-shadow:0 0 0 4px rgba(45,106,79,.08); }
+  .f-input::placeholder { color:${C.textLt}; }
+  .f-input.err    { border-color:#ef4444 !important; }
+  .err-msg        { font-family:'DM Sans',sans-serif; font-size:12px; color:#ef4444; margin-top:5px; }
 
-  /* Severity — sama style */
-  .sev-btn{flex:1;padding:12px 6px;border-radius:12px;border:2px solid ${C.border};background:#fff;cursor:pointer;text-align:center;transition:all .15s;min-width:60px;-webkit-tap-highlight-color:transparent}
-  .sev-btn:active{transform:scale(.96)}
+  /* ── section card ── */
+  .s-card  { background:#fff; border-radius:22px; border:1px solid ${C.border}; padding:26px; }
+  .s-head  { display:flex; align-items:center; gap:10px; margin-bottom:18px; }
+  .s-icon  { width:34px; height:34px; border-radius:10px; display:flex; align-items:center; justify-content:center; flex-shrink:0; }
+  .s-title { font-family:'Syne',sans-serif; font-size:16px; font-weight:700; color:${C.textDk}; }
 
-  .geo-btn{display:inline-flex;align-items:center;gap:6px;background:rgba(45,106,79,.09);color:${C.greenMd};border:none;border-radius:99px;padding:9px 16px;cursor:pointer;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:600;transition:background .18s;white-space:nowrap;-webkit-tap-highlight-color:transparent}
-  .geo-btn:hover{background:rgba(45,106,79,.15)}
-  .geo-btn:disabled{opacity:.4;cursor:not-allowed}
+  /* ── type button ── */
+  .type-btn {
+    padding:12px 6px; border-radius:14px; border:2px solid ${C.border};
+    background:#fff; cursor:pointer; text-align:center; transition:all .15s;
+    -webkit-tap-highlight-color:transparent;
+  }
+  .type-btn:hover  { border-color:${C.greenMd}; }
+  .type-btn:active { transform:scale(.95); }
+  .type-btn.active { border-color:${C.green}; background:${C.green}; }
 
-  .s-card{background:#fff;border-radius:20px;border:1px solid ${C.border};padding:22px 24px}
-  .s-head{display:flex;align-items:center;gap:10px;margin-bottom:18px}
-  .s-icon{width:34px;height:34px;border-radius:10px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
-  .s-title{font-family:'Syne',sans-serif;font-size:16px;font-weight:700;color:${C.textDk}}
+  /* ── severity button ── */
+  .sev-btn {
+    flex:1; padding:12px 6px; border-radius:12px; border:2px solid ${C.border};
+    background:#fff; cursor:pointer; text-align:center; transition:all .15s; min-width:60px;
+    -webkit-tap-highlight-color:transparent;
+  }
+  .sev-btn:active { transform:scale(.96); }
 
-  /* Submit btn — sama persis dengan btn-pay DonatePage */
-  .btn-submit{display:flex;align-items:center;justify-content:center;gap:10px;background:${C.lime};color:${C.textDk};padding:18px 18px 18px 30px;border-radius:99px;width:100%;font-family:'DM Sans',sans-serif;font-weight:700;font-size:16px;border:none;cursor:pointer;transition:background .2s,transform .2s,box-shadow .2s;-webkit-tap-highlight-color:transparent}
-  .btn-submit:hover:not(:disabled){background:${C.limeHov};transform:translateY(-2px);box-shadow:0 12px 36px rgba(181,226,53,.35)}
-  .btn-submit:active:not(:disabled){transform:scale(.98)}
-  .btn-submit:disabled{opacity:.4;cursor:not-allowed}
-  .btn-submit .ic{width:44px;height:44px;border-radius:50%;background:${C.textDk};flex-shrink:0;display:flex;align-items:center;justify-content:center;transition:transform .2s}
-  .btn-submit:hover:not(:disabled) .ic{transform:translateX(4px)}
+  /* ── geo button ── */
+  .geo-btn {
+    display:inline-flex; align-items:center; gap:6px;
+    background:rgba(45,106,79,.09); color:${C.greenMd}; border:none; border-radius:99px;
+    padding:9px 16px; cursor:pointer; font-family:'DM Sans',sans-serif; font-size:13px;
+    font-weight:600; transition:background .18s; white-space:nowrap;
+    -webkit-tap-highlight-color:transparent;
+  }
+  .geo-btn:hover    { background:rgba(45,106,79,.15); }
+  .geo-btn:disabled { opacity:.4; cursor:not-allowed; }
 
-  .err-msg{font-family:'DM Sans',sans-serif;font-size:12px;color:#ef4444;margin-top:5px}
+  /* ── submit button ── */
+  .btn-submit {
+    display:flex; align-items:center; justify-content:center; gap:10px;
+    background:${C.lime}; color:${C.textDk};
+    padding:18px 18px 18px 30px; border-radius:99px; width:100%;
+    font-family:'DM Sans',sans-serif; font-weight:700; font-size:16px;
+    border:none; cursor:pointer;
+    transition:background .2s, transform .2s, box-shadow .2s;
+    -webkit-tap-highlight-color:transparent;
+  }
+  .btn-submit:hover:not(:disabled)  { background:${C.limeHov}; transform:translateY(-2px); box-shadow:0 12px 36px rgba(181,226,53,.35); }
+  .btn-submit:active:not(:disabled) { transform:scale(.98); }
+  .btn-submit:disabled               { opacity:.4; cursor:not-allowed; }
+  .btn-submit .ic {
+    width:44px; height:44px; border-radius:50%; background:${C.textDk};
+    flex-shrink:0; display:flex; align-items:center; justify-content:center;
+    transition:transform .2s;
+  }
+  .btn-submit:hover:not(:disabled) .ic { transform:translateX(4px); }
 
-  /* Mobile sticky footer — identik dengan DonatePage */
-  .mob-footer{
-    position:fixed;bottom:0;left:0;right:0;z-index:100;
-    background:#fff;padding:12px 16px env(safe-area-inset-bottom,16px);
+  /* ── mobile sticky footer ── */
+  .mob-footer {
+    position:fixed; bottom:0; left:0; right:0; z-index:100;
+    background:#fff; padding:12px 16px 20px;
     border-top:1px solid ${C.border};
     box-shadow:0 -8px 32px rgba(0,0,0,.1);
     display:none;
   }
 
-  /* Responsive — sama pola dengan DonatePage */
-  @media(max-width:768px){
-    .mob-footer{display:block!important}
-    .desk-cta{display:none!important}
-    .report-grid{grid-template-columns:1fr!important;gap:0!important}
-    .right-col{display:none!important}
-    .page-wrap{padding:20px 16px 120px!important}
-    .hero-wrap{padding:20px 20px 36px!important}
-    .hero-title{font-size:42px!important;letter-spacing:-1.5px!important}
-    .hero-stats{gap:20px!important;flex-wrap:wrap!important}
-    .stat-val{font-size:20px!important}
-    .s-card{border-radius:18px!important;padding:18px 16px!important}
-    .type-grid{grid-template-columns:repeat(3,1fr)!important}
-    .coord-row{grid-template-columns:1fr!important}
-    .extra-row{grid-template-columns:1fr 1fr!important}
-    .photo-upload{min-height:120px!important}
+  /* ── trust chips ── */
+  .trust-chip {
+    display:inline-flex; align-items:center; gap:5px;
+    font-family:'DM Sans',sans-serif; font-size:11.5px;
+    color:${C.textLt}; background:rgba(0,0,0,.04);
+    border-radius:99px; padding:5px 10px;
   }
-  @media(min-width:769px){
-    .mob-only{display:none!important}
+
+  /* ─── RESPONSIVE — mirrors DonatePage exactly ─── */
+  @media (max-width:768px) {
+    /* Show mobile footer, hide right column */
+    .mob-footer  { display:block !important; }
+    .right-col   { display:none !important; }
+
+    /* Single column */
+    .report-grid { grid-template-columns:1fr !important; gap:0 !important; }
+
+    /* Spacing */
+    .page-wrap   { padding:20px 16px 120px !important; }
+    .hero-wrap   { padding:16px 20px 36px !important; min-height:auto !important; }
+    .hero-title  { font-size:42px !important; letter-spacing:-1.5px !important; }
+    .hero-stats  { gap:20px !important; flex-wrap:wrap !important; }
+    .stat-val    { font-size:20px !important; }
+    .s-card      { border-radius:18px !important; padding:20px !important; }
+
+    /* Form layout */
+    .type-grid   { grid-template-columns:repeat(3,1fr) !important; }
+    .coord-row   { grid-template-columns:1fr !important; }
+    .extra-row   { grid-template-columns:1fr 1fr !important; }
+    .info-grid   { grid-template-columns:1fr !important; }
+  }
+
+  @media (min-width:769px) {
+    .mob-only { display:none !important; }
   }
 `;
 
+/* ═══════════════════════════════════════════════════════════════ */
 export default function ReportPage() {
-  const navigate = useNavigate();
+  const navigate    = useNavigate();
+  const formRef     = useRef(null);
+  const extraRef    = useRef(null);
+
   const [loading,    setLoading]    = useState(false);
   const [geoLoading, setGeoLoading] = useState(false);
   const [preview,    setPreview]    = useState(null);
   const [photo,      setPhoto]      = useState(null);
   const [errors,     setErrors]     = useState({});
   const [showExtra,  setShowExtra]  = useState(false);
-  const [showLokasi, setShowLokasi] = useState(false); // mobile collapsible lokasi
-  const extraRef = useRef(null);
-  const formRef  = useRef(null);
+  const [showInfo,   setShowInfo]   = useState(false); // mobile donor info collapse
 
   const [form, setForm] = useState({
     title:'', description:'', lat:'', lng:'',
@@ -154,7 +218,8 @@ export default function ReportPage() {
   };
 
   const submit = async e => {
-    e.preventDefault(); setErrors({}); setLoading(true);
+    e?.preventDefault();
+    setErrors({}); setLoading(true);
     const fd = new FormData();
     Object.entries(form).forEach(([k, v]) => { if (v !== '') fd.append(k, v); });
     if (photo) fd.append('photo', photo);
@@ -177,35 +242,171 @@ export default function ReportPage() {
   const activeSev  = SEVERITIES.find(s => s.value === form.severity);
   const activeType = TYPES.find(t => t.value === form.report_type);
 
-  // Progress — sama dengan DonatePage progress dots
+  /* progress dots for mobile footer */
   const progress = [
     !!form.title && !!form.description,
+    !!form.report_type,
     !!form.lat && !!form.lng,
-    !!photo,
   ];
   const progressCount = progress.filter(Boolean).length;
 
-  // Lokasi summary untuk mobile footer
-  const lokasiLabel = form.location_text || (form.lat ? `${parseFloat(form.lat).toFixed(3)}, ${parseFloat(form.lng).toFixed(3)}` : null);
+  /* ─── Shared info fields (optional donor-like info) ─────── */
+  function LocationFields() {
+    return (
+      <div style={{ display:'flex', flexDirection:'column', gap:14 }}>
+        <div className="coord-row" style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:12 }}>
+          <div>
+            <label className="f-label">Latitude <span style={{ color:'#ef4444' }}>*</span></label>
+            <input value={form.lat} onChange={e => set('lat', e.target.value)}
+              placeholder="-6.200000" inputMode="decimal"
+              className={`f-input${errors.lat ? ' err' : ''}`}/>
+            {errors.lat && <p className="err-msg">{errors.lat[0]}</p>}
+          </div>
+          <div>
+            <label className="f-label">Longitude <span style={{ color:'#ef4444' }}>*</span></label>
+            <input value={form.lng} onChange={e => set('lng', e.target.value)}
+              placeholder="106.800000" inputMode="decimal"
+              className={`f-input${errors.lng ? ' err' : ''}`}/>
+            {errors.lng && <p className="err-msg">{errors.lng[0]}</p>}
+          </div>
+        </div>
+        <div>
+          <label className="f-label">Nama Lokasi</label>
+          <input value={form.location_text} onChange={e => set('location_text', e.target.value)}
+            placeholder="Contoh: Kalimantan Tengah, Kab. Kotawaringin" className="f-input"/>
+        </div>
+        <div style={{ display:'flex', alignItems:'flex-start', gap:9,
+          background:'rgba(14,165,233,.06)', border:'1px solid rgba(14,165,233,.12)',
+          borderRadius:12, padding:'11px 14px' }}>
+          <Info size={14} color='#0ea5e9' style={{ flexShrink:0, marginTop:1 }}/>
+          <p style={{ fontFamily:"'DM Sans',sans-serif", fontSize:12.5, color:C.textMd, lineHeight:1.55 }}>
+            Klik <strong>Deteksi Otomatis</strong> atau salin koordinat dari Google Maps.
+          </p>
+        </div>
+      </div>
+    );
+  }
 
+  /* ─── Right column summary card — mirrors DonatePage SummaryCard ── */
+  function PreviewCard() {
+    return (
+      <div style={{ background:C.green, borderRadius:22, padding:'28px',
+        position:'relative', overflow:'hidden' }}>
+        <div style={{ position:'absolute', right:-40, top:-40,
+          width:160, height:160, borderRadius:'50%',
+          background:'rgba(181,226,53,.07)', pointerEvents:'none' }}/>
+
+        <p style={{ fontFamily:"'DM Sans',sans-serif", fontSize:11,
+          color:'rgba(255,255,255,.35)', letterSpacing:'.8px',
+          textTransform:'uppercase', marginBottom:20 }}>
+          Pratinjau Laporan
+        </p>
+
+        {/* Title preview — mirrors "big tree count" block */}
+        <div style={{ textAlign:'center', padding:'14px 0 22px',
+          borderBottom:'1px solid rgba(255,255,255,.1)', marginBottom:20 }}>
+          {form.title ? (
+            <p style={{ fontFamily:"'Syne',sans-serif", fontSize:17, fontWeight:800,
+              color:'#fff', lineHeight:1.25, padding:'0 8px' }}>
+              {form.title}
+            </p>
+          ) : (
+            <div style={{ padding:'6px 0' }}>
+              <FileText size={40} color="rgba(255,255,255,.1)"
+                style={{ margin:'0 auto 8px', display:'block' }}/>
+              <p style={{ fontFamily:"'DM Sans',sans-serif", fontSize:13,
+                color:'rgba(255,255,255,.2)' }}>Judul belum diisi</p>
+            </div>
+          )}
+        </div>
+
+        {/* Summary rows — mirrors DonatePage */}
+        <div style={{ display:'flex', flexDirection:'column', gap:11, marginBottom:20 }}>
+          {[
+            { l:'Jenis',     v:`${activeType?.emoji} ${activeType?.label}`           },
+            { l:'Keparahan', v: activeSev?.label,   color: activeSev?.color          },
+            { l:'Lokasi',    v: form.location_text || (form.lat ? `${form.lat}, ${form.lng}` : '—') },
+          ].map(({ l, v, color }) => (
+            <div key={l} style={{ display:'flex', justifyContent:'space-between', alignItems:'center', gap:12 }}>
+              <span style={{ fontFamily:"'DM Sans',sans-serif", fontSize:13,
+                color:'rgba(255,255,255,.4)', flexShrink:0 }}>{l}</span>
+              <span style={{ fontFamily:"'DM Sans',sans-serif", fontSize:13.5,
+                fontWeight:600, color: color ?? 'rgba(255,255,255,.75)',
+                textAlign:'right', overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap' }}>
+                {v || '—'}
+              </span>
+            </div>
+          ))}
+          {/* Data tambahan rows */}
+          {(form.area_affected || form.trees_lost) && (
+            <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:10, marginTop:6 }}>
+              {form.area_affected && (
+                <div style={{ background:'rgba(255,255,255,.07)', borderRadius:12, padding:'12px' }}>
+                  <p style={{ fontFamily:"'Syne',sans-serif", fontSize:22, fontWeight:800,
+                    color:'#fb923c', lineHeight:1 }}>{form.area_affected}</p>
+                  <p style={{ fontFamily:"'DM Sans',sans-serif", fontSize:11,
+                    color:'rgba(255,255,255,.28)', marginTop:3 }}>hektar</p>
+                </div>
+              )}
+              {form.trees_lost && (
+                <div style={{ background:'rgba(255,255,255,.07)', borderRadius:12, padding:'12px' }}>
+                  <p style={{ fontFamily:"'Syne',sans-serif", fontSize:22, fontWeight:800,
+                    color:'#f87171', lineHeight:1 }}>{parseInt(form.trees_lost).toLocaleString('id')}</p>
+                  <p style={{ fontFamily:"'DM Sans',sans-serif", fontSize:11,
+                    color:'rgba(255,255,255,.28)', marginTop:3 }}>pohon hilang</p>
+                </div>
+              )}
+            </div>
+          )}
+        </div>
+
+        {/* Trust — mirrors DonatePage */}
+        <div style={{ borderTop:'1px solid rgba(255,255,255,.1)', paddingTop:16 }}>
+          {['✅ Diverifikasi tim kami','📡 Diteruskan ke otoritas','🌿 Tercatat transparan'].map(t => (
+            <p key={t} style={{ fontFamily:"'DM Sans',sans-serif", fontSize:12.5,
+              color:'rgba(255,255,255,.35)', marginBottom:7 }}>{t}</p>
+          ))}
+        </div>
+      </div>
+    );
+  }
+
+  /* ═══════════════ RENDER ════════════════════════════════════ */
   return (
     <>
       <style>{CSS}</style>
 
-      {/* ── HERO — sama dengan DonatePage ── */}
+      {/* ── HERO — identical structure to DonatePage ── */}
       <div style={{ position:'relative', overflow:'hidden', background:C.green }}>
         <img
           src="https://images.unsplash.com/photo-1542601906990-b4d3fb778b09?w=1400&auto=format&fit=crop&q=80"
           alt=""
-          style={{ position:'absolute', inset:0, width:'100%', height:'100%', objectFit:'cover', objectPosition:'center 35%', display:'block' }}
+          style={{ position:'absolute', inset:0, width:'100%', height:'100%',
+            objectFit:'cover', objectPosition:'center 35%', display:'block' }}
         />
-        <div style={{ position:'absolute', inset:0, background:'linear-gradient(105deg,rgba(27,58,43,.97) 0%,rgba(27,58,43,.88) 40%,rgba(27,58,43,.5) 100%)' }}/>
+        <div style={{ position:'absolute', inset:0,
+          background:'linear-gradient(105deg,rgba(27,58,43,.97) 0%,rgba(27,58,43,.88) 40%,rgba(27,58,43,.5) 100%)' }}/>
+
         <div style={{ maxWidth:1100, margin:'0 auto', position:'relative', zIndex:1 }}>
           <div style={{ height:80 }}/>
           <div className="fu d1 hero-wrap" style={{ padding:'16px 60px 52px' }}>
-            <h1 className="fu d1 hero-title" style={{ fontFamily:"'Syne',sans-serif", fontWeight:800, fontSize:60, lineHeight:.96, letterSpacing:'-2.5px', color:'#fff', marginBottom:24 }}>
+
+            {/* Alert badge */}
+            <div style={{ display:'inline-flex', alignItems:'center', gap:7,
+              background:'rgba(239,68,68,.15)', border:'1px solid rgba(239,68,68,.22)',
+              borderRadius:99, padding:'5px 14px', marginBottom:16 }}>
+              <AlertTriangle size={12} color='#f87171'/>
+              <span style={{ fontFamily:"'DM Sans',sans-serif", fontSize:12,
+                color:'#f87171', fontWeight:600 }}>Laporan Kerusakan Hutan</span>
+            </div>
+
+            <h1 className="fu d1 hero-title" style={{
+              fontFamily:"'Syne',sans-serif", fontWeight:800, fontSize:60,
+              lineHeight:.96, letterSpacing:'-2.5px', color:'#fff', marginBottom:24,
+            }}>
               Buat Laporan,<br/><span style={{ color:C.lime }}>Sekarang</span>
             </h1>
+
             <div className="hero-stats" style={{ display:'flex', gap:28, flexWrap:'wrap' }}>
               {[
                 { v:'12.400+', l:'Laporan Terkirim' },
@@ -213,8 +414,10 @@ export default function ReportPage() {
                 { v:'3.200+',  l:'Relawan Aktif'    },
               ].map(({ v, l }) => (
                 <div key={l}>
-                  <p className="stat-val" style={{ fontFamily:"'Syne',sans-serif", fontSize:22, fontWeight:800, color:C.lime, lineHeight:1 }}>{v}</p>
-                  <p style={{ fontFamily:"'DM Sans',sans-serif", fontSize:11, color:'rgba(255,255,255,.38)', marginTop:4 }}>{l}</p>
+                  <p className="stat-val" style={{ fontFamily:"'Syne',sans-serif",
+                    fontSize:22, fontWeight:800, color:C.lime, lineHeight:1 }}>{v}</p>
+                  <p style={{ fontFamily:"'DM Sans',sans-serif", fontSize:11,
+                    color:'rgba(255,255,255,.38)', marginTop:4 }}>{l}</p>
                 </div>
               ))}
             </div>
@@ -222,19 +425,38 @@ export default function ReportPage() {
         </div>
       </div>
 
-      {/* ── FORM ── */}
+      {/* ── MAIN CONTENT — same grid as DonatePage ── */}
       <div style={{ background:C.offWhite }}>
         <div className="page-wrap" style={{ maxWidth:1100, margin:'0 auto', padding:'32px 60px 80px' }}>
-          <form onSubmit={submit} ref={formRef}>
-            <div className="report-grid" style={{ display:'grid', gridTemplateColumns:'1fr 370px', gap:28, alignItems:'start' }}>
+          <form ref={formRef} onSubmit={submit}>
+            <div className="report-grid" style={{
+              display:'grid', gridTemplateColumns:'1fr 370px', gap:28, alignItems:'start',
+            }}>
 
-              {/* ══ LEFT ══ */}
+              {/* ═══ LEFT — form fields (no submit button here) ═══ */}
               <div style={{ display:'flex', flexDirection:'column', gap:18 }}>
+
+                {/* Mobile progress bar */}
+                <div className="mob-only" style={{ marginBottom:2 }}>
+                  <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom:8 }}>
+                    <span style={{ fontFamily:"'DM Sans',sans-serif", fontSize:12, color:C.textLt }}>
+                      Progres pengisian
+                    </span>
+                    <span style={{ fontFamily:"'Syne',sans-serif", fontSize:13,
+                      fontWeight:700, color:C.greenMd }}>{progressCount}/3 langkah</span>
+                  </div>
+                  <div style={{ height:5, borderRadius:99, background:C.border, overflow:'hidden' }}>
+                    <div style={{ height:5, borderRadius:99, background:C.lime,
+                      width:`${(progressCount/3)*100}%`, transition:'width .4s ease' }}/>
+                  </div>
+                </div>
 
                 {/* 1. Informasi Utama */}
                 <div className="s-card fu d1">
                   <div className="s-head">
-                    <div className="s-icon" style={{ background:'rgba(27,58,43,.08)' }}><FileText size={16} color={C.greenMd}/></div>
+                    <div className="s-icon" style={{ background:'rgba(27,58,43,.08)' }}>
+                      <FileText size={16} color={C.greenMd}/>
+                    </div>
                     <span className="s-title">Informasi Utama</span>
                   </div>
                   <div style={{ display:'flex', flexDirection:'column', gap:14 }}>
@@ -242,14 +464,14 @@ export default function ReportPage() {
                       <label className="f-label">Judul Laporan <span style={{ color:'#ef4444' }}>*</span></label>
                       <input value={form.title} onChange={e => set('title', e.target.value)}
                         placeholder="Contoh: Pembukaan lahan sawit ilegal di Kalimantan Tengah"
-                        className={`f-input${errors.title?' err':''}`}/>
+                        className={`f-input${errors.title ? ' err' : ''}`}/>
                       {errors.title && <p className="err-msg">{errors.title[0]}</p>}
                     </div>
                     <div>
                       <label className="f-label">Deskripsi <span style={{ color:'#ef4444' }}>*</span></label>
                       <textarea value={form.description} onChange={e => set('description', e.target.value)}
                         rows={4} placeholder="Kapan terjadi, seberapa parah, ada alat berat atau tidak..."
-                        className={`f-input${errors.description?' err':''}`}
+                        className={`f-input${errors.description ? ' err' : ''}`}
                         style={{ resize:'vertical', minHeight:100 }}/>
                       {errors.description && <p className="err-msg">{errors.description[0]}</p>}
                     </div>
@@ -259,15 +481,25 @@ export default function ReportPage() {
                 {/* 2. Jenis & Keparahan */}
                 <div className="s-card fu d1">
                   <div className="s-head">
-                    <div className="s-icon" style={{ background:'rgba(245,158,11,.1)' }}><Tag size={16} color='#f59e0b'/></div>
+                    <div className="s-icon" style={{ background:'rgba(245,158,11,.1)' }}>
+                      <Tag size={16} color='#f59e0b'/>
+                    </div>
                     <span className="s-title">Jenis & Keparahan</span>
                   </div>
-                  <label className="f-label" style={{ marginBottom:10 }}>Jenis Kerusakan <span style={{ color:'#ef4444' }}>*</span></label>
+                  <label className="f-label" style={{ marginBottom:10 }}>
+                    Jenis Kerusakan <span style={{ color:'#ef4444' }}>*</span>
+                  </label>
                   <div className="type-grid" style={{ display:'grid', gridTemplateColumns:'repeat(6,1fr)', gap:8, marginBottom:20 }}>
                     {TYPES.map(t => (
-                      <button key={t.value} type="button" className={`type-btn${form.report_type===t.value?' active':''}`} onClick={() => set('report_type', t.value)}>
+                      <button key={t.value} type="button"
+                        className={`type-btn${form.report_type === t.value ? ' active' : ''}`}
+                        onClick={() => set('report_type', t.value)}>
                         <div style={{ fontSize:22, marginBottom:5 }}>{t.emoji}</div>
-                        <div style={{ fontFamily:"'DM Sans',sans-serif", fontSize:11, fontWeight:600, lineHeight:1.25, color:form.report_type===t.value?'#fff':C.textMd }}>{t.label}</div>
+                        <div style={{ fontFamily:"'DM Sans',sans-serif", fontSize:11,
+                          fontWeight:600, lineHeight:1.25,
+                          color: form.report_type === t.value ? '#fff' : C.textMd }}>
+                          {t.label}
+                        </div>
                       </button>
                     ))}
                   </div>
@@ -275,10 +507,15 @@ export default function ReportPage() {
                   <div style={{ display:'flex', gap:8 }}>
                     {SEVERITIES.map(s => (
                       <button key={s.value} type="button" className="sev-btn"
-                        style={form.severity===s.value?{borderColor:s.color,background:s.bg,transform:'translateY(-1px)',boxShadow:`0 4px 12px ${s.color}30`}:{}}
+                        style={form.severity === s.value ? {
+                          borderColor:s.color, background:s.bg,
+                          transform:'translateY(-1px)', boxShadow:`0 4px 12px ${s.color}30`,
+                        } : {}}
                         onClick={() => set('severity', s.value)}>
-                        <span style={{ display:'block', width:9, height:9, borderRadius:'50%', background:s.color, margin:'0 auto 7px' }}/>
-                        <span style={{ fontFamily:"'DM Sans',sans-serif", fontSize:13, fontWeight:700, color:form.severity===s.value?s.color:C.textMd }}>{s.label}</span>
+                        <span style={{ display:'block', width:9, height:9, borderRadius:'50%',
+                          background:s.color, margin:'0 auto 7px' }}/>
+                        <span style={{ fontFamily:"'DM Sans',sans-serif", fontSize:13, fontWeight:700,
+                          color: form.severity === s.value ? s.color : C.textMd }}>{s.label}</span>
                       </button>
                     ))}
                   </div>
@@ -288,43 +525,53 @@ export default function ReportPage() {
                 <div className="s-card fu d1 desk-cta">
                   <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom:18 }}>
                     <div className="s-head" style={{ marginBottom:0 }}>
-                      <div className="s-icon" style={{ background:'rgba(14,165,233,.1)' }}><MapPin size={16} color='#0ea5e9'/></div>
+                      <div className="s-icon" style={{ background:'rgba(14,165,233,.1)' }}>
+                        <MapPin size={16} color='#0ea5e9'/>
+                      </div>
                       <span className="s-title">Lokasi Kejadian</span>
                     </div>
                     <button type="button" className="geo-btn" onClick={detectLocation} disabled={geoLoading}>
-                      <Locate size={14}/>{geoLoading?'Mendeteksi…':'Deteksi Otomatis'}
+                      <Locate size={14}/>{geoLoading ? 'Mendeteksi…' : 'Deteksi Otomatis'}
                     </button>
                   </div>
-                  <LokasiFields form={form} set={set} errors={errors} detectLocation={detectLocation} geoLoading={geoLoading}/>
+                  <LocationFields/>
                 </div>
 
-                {/* 3b. Lokasi — mobile collapsible (sama pola dengan donor info di DonatePage) */}
-                <div className="mob-only s-card fu d1" style={{ overflow:'hidden', padding:0 }}>
+                {/* 3. Lokasi — mobile collapsible */}
+                <div className="mob-only s-card" style={{ overflow:'hidden', padding:0 }}>
                   <button type="button"
-                    style={{ width:'100%', display:'flex', alignItems:'center', justifyContent:'space-between', padding:'16px 20px', background:'none', border:'none', cursor:'pointer' }}
-                    onClick={() => setShowLokasi(s => !s)}>
-                    <div style={{ display:'flex', alignItems:'center', gap:10 }}>
-                      <div className="s-icon" style={{ background:'rgba(14,165,233,.1)', width:34, height:34 }}><MapPin size={16} color='#0ea5e9'/></div>
+                    style={{ width:'100%', display:'flex', alignItems:'center',
+                      justifyContent:'space-between', padding:'18px 20px',
+                      background:'none', border:'none', cursor:'pointer' }}
+                    onClick={() => setShowInfo(s => !s)}>
+                    <div className="s-head" style={{ marginBottom:0 }}>
+                      <div className="s-icon" style={{ background:'rgba(14,165,233,.1)' }}>
+                        <MapPin size={16} color='#0ea5e9'/>
+                      </div>
                       <div style={{ textAlign:'left' }}>
-                        <p style={{ fontFamily:"'Syne',sans-serif", fontSize:15, fontWeight:700, color:C.textDk }}>Lokasi Kejadian</p>
-                        <p style={{ fontFamily:"'DM Sans',sans-serif", fontSize:12, color: lokasiLabel ? C.greenMd : C.textLt, marginTop:2 }}>
-                          {lokasiLabel || 'Belum diisi — wajib'}
+                        <span className="s-title">Lokasi Kejadian</span>
+                        <p style={{ fontFamily:"'DM Sans',sans-serif", fontSize:11.5,
+                          color: (form.lat && form.lng) ? C.greenMd : C.textLt, marginTop:2 }}>
+                          {(form.lat && form.lng) ? `${form.lat}, ${form.lng}` : 'Belum diisi'}
                         </p>
                       </div>
                     </div>
                     <div style={{ display:'flex', alignItems:'center', gap:8 }}>
-                      {(form.lat && form.lng) && <CheckCircle size={16} color={C.greenMd}/>}
-                      <ChevronDown size={18} color={C.textLt} style={{ transition:'transform .25s', transform:showLokasi?'rotate(180deg)':'rotate(0deg)', flexShrink:0 }}/>
+                      <button type="button" className="geo-btn"
+                        style={{ padding:'7px 12px', fontSize:12 }}
+                        onClick={e => { e.stopPropagation(); detectLocation(); }}
+                        disabled={geoLoading}>
+                        <Locate size={13}/>{geoLoading ? '…' : 'Deteksi'}
+                      </button>
+                      <ChevronDown size={18} color={C.textLt}
+                        style={{ transition:'transform .25s', flexShrink:0,
+                          transform: showInfo ? 'rotate(180deg)' : 'rotate(0deg)' }}/>
                     </div>
                   </button>
-                  {showLokasi && (
+                  {showInfo && (
                     <div style={{ padding:'0 20px 20px', borderTop:`1px solid ${C.border}` }}>
-                      <div style={{ display:'flex', justifyContent:'flex-end', paddingTop:14, marginBottom:14 }}>
-                        <button type="button" className="geo-btn" onClick={detectLocation} disabled={geoLoading}>
-                          <Locate size={14}/>{geoLoading?'Mendeteksi…':'Deteksi Otomatis'}
-                        </button>
-                      </div>
-                      <LokasiFields form={form} set={set} errors={errors}/>
+                      <div style={{ height:14 }}/>
+                      <LocationFields/>
                     </div>
                   )}
                 </div>
@@ -332,150 +579,130 @@ export default function ReportPage() {
                 {/* 4. Foto Bukti */}
                 <div className="s-card fu d2">
                   <div className="s-head">
-                    <div className="s-icon" style={{ background:'rgba(139,92,246,.1)' }}><Camera size={16} color='#8b5cf6'/></div>
+                    <div className="s-icon" style={{ background:'rgba(139,92,246,.1)' }}>
+                      <Camera size={16} color='#8b5cf6'/>
+                    </div>
                     <span className="s-title">Foto Bukti</span>
                   </div>
-                  <label style={{ display:'flex', flexDirection:'column', alignItems:'center', justifyContent:'center', border:`2px dashed ${C.border}`, borderRadius:16, cursor:'pointer', overflow:'hidden', background:C.offWhite, transition:'border-color .2s,background .2s', minHeight:140 }}
-                    className="photo-upload"
-                    onMouseEnter={e=>{e.currentTarget.style.borderColor=C.greenMd;e.currentTarget.style.background='rgba(45,106,79,.03)'}}
-                    onMouseLeave={e=>{e.currentTarget.style.borderColor=C.border;e.currentTarget.style.background=C.offWhite}}>
+                  <label style={{
+                    display:'flex', flexDirection:'column', alignItems:'center', justifyContent:'center',
+                    border:`2px dashed ${C.border}`, borderRadius:16, cursor:'pointer',
+                    overflow:'hidden', background:C.offWhite, minHeight:140,
+                    transition:'border-color .2s, background .2s',
+                  }}
+                  onMouseEnter={e => { e.currentTarget.style.borderColor=C.greenMd; e.currentTarget.style.background='rgba(45,106,79,.03)'; }}
+                  onMouseLeave={e => { e.currentTarget.style.borderColor=C.border; e.currentTarget.style.background=C.offWhite; }}
+                  >
                     {preview ? (
                       <div style={{ position:'relative', width:'100%' }}>
-                        <img src={preview} alt="preview" style={{ width:'100%', maxHeight:260, objectFit:'cover', display:'block', borderRadius:14 }}/>
-                        <button type="button" onClick={e=>{e.preventDefault();setPreview(null);setPhoto(null)}}
-                          style={{ position:'absolute', top:10, right:10, background:'rgba(255,255,255,.95)', border:`1px solid ${C.border}`, borderRadius:'50%', width:34, height:34, display:'flex', alignItems:'center', justifyContent:'center', cursor:'pointer', color:C.textMd, boxShadow:'0 2px 8px rgba(0,0,0,.12)' }}>
+                        <img src={preview} alt="preview"
+                          style={{ width:'100%', maxHeight:260, objectFit:'cover', display:'block', borderRadius:14 }}/>
+                        <button type="button"
+                          onClick={e => { e.preventDefault(); setPreview(null); setPhoto(null); }}
+                          style={{ position:'absolute', top:10, right:10,
+                            background:'rgba(255,255,255,.95)', border:`1px solid ${C.border}`,
+                            borderRadius:'50%', width:34, height:34,
+                            display:'flex', alignItems:'center', justifyContent:'center',
+                            cursor:'pointer', color:C.textMd, boxShadow:'0 2px 8px rgba(0,0,0,.12)' }}>
                           <X size={15}/>
                         </button>
                       </div>
                     ) : (
                       <div style={{ padding:'28px 20px', textAlign:'center' }}>
-                        <div style={{ width:52, height:52, borderRadius:14, background:'rgba(139,92,246,.1)', display:'flex', alignItems:'center', justifyContent:'center', margin:'0 auto 12px' }}>
+                        <div style={{ width:52, height:52, borderRadius:14,
+                          background:'rgba(139,92,246,.1)',
+                          display:'flex', alignItems:'center', justifyContent:'center',
+                          margin:'0 auto 12px' }}>
                           <Upload size={22} color='#8b5cf6'/>
                         </div>
-                        <p style={{ fontFamily:"'DM Sans',sans-serif", fontSize:14, color:C.textMd, fontWeight:600, marginBottom:4 }}>Upload Foto Bukti</p>
-                        <p style={{ fontFamily:"'DM Sans',sans-serif", fontSize:12, color:C.textLt }}>Klik atau seret · Maks. 5 MB</p>
+                        <p style={{ fontFamily:"'DM Sans',sans-serif", fontSize:14,
+                          color:C.textMd, fontWeight:600, marginBottom:4 }}>Upload Foto Bukti</p>
+                        <p style={{ fontFamily:"'DM Sans',sans-serif", fontSize:12, color:C.textLt }}>
+                          Klik atau seret · Maks. 5 MB
+                        </p>
                       </div>
                     )}
-                    <input type="file" accept="image/*" capture="environment" style={{ display:'none' }} onChange={handlePhoto}/>
+                    <input type="file" accept="image/*" capture="environment"
+                      style={{ display:'none' }} onChange={handlePhoto}/>
                   </label>
-                  <p style={{ fontFamily:"'DM Sans',sans-serif", fontSize:12, color:C.textLt, marginTop:10, textAlign:'center' }}>
+                  <p style={{ fontFamily:"'DM Sans',sans-serif", fontSize:12, color:C.textLt,
+                    marginTop:10, textAlign:'center' }}>
                     📸 Di mobile, kamu juga bisa langsung ambil foto dari kamera
                   </p>
                 </div>
 
-                {/* 5. Data Tambahan — collapsible (sama pola DonatePage) */}
-                <div className="s-card fu d2" ref={extraRef} style={{ overflow:'hidden', padding:0 }}>
+                {/* 5. Data Tambahan — collapsible */}
+                <div className="s-card fu d2" ref={extraRef}>
                   <button type="button"
-                    style={{ width:'100%', display:'flex', alignItems:'center', justifyContent:'space-between', padding:'18px 22px', background:'none', border:'none', cursor:'pointer' }}
+                    style={{ width:'100%', display:'flex', alignItems:'center',
+                      justifyContent:'space-between', background:'none', border:'none', cursor:'pointer', padding:0 }}
                     onClick={() => {
                       const next = !showExtra;
                       setShowExtra(next);
                       if (next) setTimeout(() => extraRef.current?.scrollIntoView({ behavior:'smooth', block:'start' }), 120);
                     }}>
-                    <div style={{ display:'flex', alignItems:'center', gap:10 }}>
-                      <div className="s-icon" style={{ background:'rgba(239,68,68,.09)', width:34, height:34 }}><AlertTriangle size={16} color='#ef4444'/></div>
+                    <div className="s-head" style={{ marginBottom:0 }}>
+                      <div className="s-icon" style={{ background:'rgba(239,68,68,.09)' }}>
+                        <AlertTriangle size={16} color='#ef4444'/>
+                      </div>
                       <div style={{ textAlign:'left' }}>
                         <span className="s-title">Data Tambahan</span>
-                        <p style={{ fontFamily:"'DM Sans',sans-serif", fontSize:11.5, color:C.textLt, marginTop:2 }}>Opsional — luas & estimasi pohon</p>
+                        <p style={{ fontFamily:"'DM Sans',sans-serif", fontSize:11.5, color:C.textLt, marginTop:2 }}>
+                          Opsional — luas & estimasi pohon
+                        </p>
                       </div>
                     </div>
-                    <ChevronDown size={18} color={C.textLt} style={{ transition:'transform .25s', flexShrink:0, transform:showExtra?'rotate(180deg)':'rotate(0deg)' }}/>
+                    <ChevronDown size={18} color={C.textLt}
+                      style={{ transition:'transform .25s', flexShrink:0,
+                        transform: showExtra ? 'rotate(180deg)' : 'rotate(0deg)' }}/>
                   </button>
                   {showExtra && (
-                    <div style={{ padding:'0 22px 20px', borderTop:`1px solid ${C.border}` }}>
-                      <div style={{ height:16 }}/>
+                    <div style={{ marginTop:18, paddingTop:16, borderTop:`1px solid ${C.border}` }}>
                       <div className="extra-row" style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:14 }}>
                         <div>
                           <label className="f-label">Luas (hektar)</label>
-                          <input type="number" value={form.area_affected} onChange={e=>set('area_affected',e.target.value)} placeholder="0" min="0" inputMode="decimal" className="f-input"/>
+                          <input type="number" value={form.area_affected}
+                            onChange={e => set('area_affected', e.target.value)}
+                            placeholder="0" min="0" inputMode="decimal" className="f-input"/>
                         </div>
                         <div>
                           <label className="f-label">Pohon hilang (est.)</label>
-                          <input type="number" value={form.trees_lost} onChange={e=>set('trees_lost',e.target.value)} placeholder="0" min="0" inputMode="numeric" className="f-input"/>
+                          <input type="number" value={form.trees_lost}
+                            onChange={e => set('trees_lost', e.target.value)}
+                            placeholder="0" min="0" inputMode="numeric" className="f-input"/>
                         </div>
                       </div>
                     </div>
                   )}
                 </div>
 
-                {/* Desktop submit — hanya di left col, tidak di sidebar */}
-                <div className="desk-cta" style={{ display:'flex', flexDirection:'column', gap:12 }}>
-                  <button type="submit" className="btn-submit fu d2" disabled={loading}>
-                    {loading?'Mengirim…':<>Kirim Laporan <span className="ic"><ArrowRight size={17} color={C.lime}/></span></>}
-                  </button>
-                  <p style={{ fontFamily:"'DM Sans',sans-serif", fontSize:12, color:C.textLt, textAlign:'center', lineHeight:1.6 }}>
-                    Laporan diverifikasi sebelum dipublikasikan
-                  </p>
+                {/* Trust chips — mobile */}
+                <div className="mob-only" style={{ display:'flex', gap:6, flexWrap:'wrap',
+                  justifyContent:'center', paddingBottom:4 }}>
+                  {['✅ Diverifikasi','📡 Diteruskan','🌿 Transparan'].map(t => (
+                    <span key={t} className="trust-chip">{t}</span>
+                  ))}
                 </div>
 
               </div>
+              {/* END LEFT */}
 
-              {/* ══ RIGHT — desktop sidebar, sama pola SummaryCard DonatePage ══ */}
-              <div className="right-col" style={{ position:'sticky', top:96, display:'flex', flexDirection:'column', gap:16 }}>
-                {/* Preview card — sama style dengan SummaryCard */}
-                <div style={{ background:C.green, borderRadius:22, padding:'28px', position:'relative', overflow:'hidden' }}>
-                  <div style={{ position:'absolute', right:-40, top:-40, width:160, height:160, borderRadius:'50%', background:'rgba(181,226,53,.07)', pointerEvents:'none' }}/>
-                  <p style={{ fontFamily:"'DM Sans',sans-serif", fontSize:11, color:'rgba(255,255,255,.35)', letterSpacing:'.8px', textTransform:'uppercase', marginBottom:20 }}>Pratinjau Laporan</p>
+              {/* ═══ RIGHT — sticky preview + submit (desktop only) ═══ */}
+              <div className="right-col" style={{ position:'sticky', top:96,
+                display:'flex', flexDirection:'column', gap:16 }}>
 
-                  <div style={{ display:'flex', flexDirection:'column', gap:14 }}>
-                    <div>
-                      <p style={{ fontFamily:"'DM Sans',sans-serif", fontSize:10, color:'rgba(255,255,255,.28)', textTransform:'uppercase', letterSpacing:'.6px', marginBottom:5 }}>Judul</p>
-                      <p style={{ fontFamily:"'Syne',sans-serif", fontSize:15, fontWeight:700, lineHeight:1.3, color:form.title?'#fff':'rgba(255,255,255,.16)' }}>
-                        {form.title || 'Belum diisi…'}
-                      </p>
-                    </div>
-                    <div style={{ height:1, background:'rgba(255,255,255,.08)' }}/>
-                    <div style={{ display:'flex', gap:7, flexWrap:'wrap' }}>
-                      <span style={{ background:'rgba(255,255,255,.1)', color:'rgba(255,255,255,.7)', borderRadius:99, padding:'4px 11px', fontFamily:"'DM Sans',sans-serif", fontSize:11.5 }}>
-                        {activeType?.emoji} {activeType?.label}
-                      </span>
-                      {activeSev && (
-                        <span style={{ background:activeSev.bg, color:activeSev.color, borderRadius:99, padding:'4px 11px', fontFamily:"'DM Sans',sans-serif", fontSize:11.5, fontWeight:600, display:'flex', alignItems:'center', gap:4 }}>
-                          <span style={{ width:6, height:6, borderRadius:'50%', background:activeSev.color }}/>
-                          {activeSev.label}
-                        </span>
-                      )}
-                    </div>
-                    <div style={{ height:1, background:'rgba(255,255,255,.08)' }}/>
-                    <div>
-                      <p style={{ fontFamily:"'DM Sans',sans-serif", fontSize:10, color:'rgba(255,255,255,.28)', textTransform:'uppercase', letterSpacing:'.6px', marginBottom:5 }}>Lokasi</p>
-                      <p style={{ fontFamily:"'DM Sans',sans-serif", fontSize:13.5, color:(form.location_text||form.lat)?'rgba(255,255,255,.7)':'rgba(255,255,255,.16)' }}>
-                        {form.location_text || (form.lat?`${form.lat}, ${form.lng}`:'Belum diisi…')}
-                      </p>
-                    </div>
-                    {(form.area_affected || form.trees_lost) && (
-                      <>
-                        <div style={{ height:1, background:'rgba(255,255,255,.08)' }}/>
-                        <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:10 }}>
-                          {form.area_affected && (
-                            <div style={{ background:'rgba(255,255,255,.07)', borderRadius:12, padding:'12px' }}>
-                              <p style={{ fontFamily:"'Syne',sans-serif", fontSize:22, fontWeight:800, color:'#fb923c', lineHeight:1 }}>{form.area_affected}</p>
-                              <p style={{ fontFamily:"'DM Sans',sans-serif", fontSize:11, color:'rgba(255,255,255,.28)', marginTop:3 }}>hektar</p>
-                            </div>
-                          )}
-                          {form.trees_lost && (
-                            <div style={{ background:'rgba(255,255,255,.07)', borderRadius:12, padding:'12px' }}>
-                              <p style={{ fontFamily:"'Syne',sans-serif", fontSize:22, fontWeight:800, color:'#f87171', lineHeight:1 }}>{parseInt(form.trees_lost).toLocaleString('id')}</p>
-                              <p style={{ fontFamily:"'DM Sans',sans-serif", fontSize:11, color:'rgba(255,255,255,.28)', marginTop:3 }}>pohon hilang</p>
-                            </div>
-                          )}
-                        </div>
-                      </>
-                    )}
-                    <div style={{ borderTop:'1px solid rgba(255,255,255,.08)', paddingTop:14 }}>
-                      {['✅ Diverifikasi tim kami','📡 Diteruskan ke otoritas','🌿 Tercatat transparan'].map(t => (
-                        <p key={t} style={{ fontFamily:"'DM Sans',sans-serif", fontSize:12, color:'rgba(255,255,255,.32)', marginBottom:6 }}>{t}</p>
-                      ))}
-                    </div>
-                  </div>
-                </div>
+                <PreviewCard/>
 
-                {/* Submit button di sidebar — desktop */}
-                <button type="button" className="btn-submit" disabled={loading}
-                  onClick={() => formRef.current?.requestSubmit()}>
-                  {loading?'Mengirim…':<>Kirim Laporan <span className="ic"><ArrowRight size={17} color={C.lime}/></span></>}
+                {/* Submit button — ONLY here, not in left column */}
+                <button type="submit" className="btn-submit" disabled={loading}>
+                  {loading
+                    ? 'Mengirim…'
+                    : <>Kirim Laporan <span className="ic"><ArrowRight size={17} color={C.lime}/></span></>
+                  }
                 </button>
-                <p style={{ fontFamily:"'DM Sans',sans-serif", fontSize:11.5, color:C.textLt, textAlign:'center', lineHeight:1.6 }}>
+
+                <p style={{ fontFamily:"'DM Sans',sans-serif", fontSize:11.5,
+                  color:C.textLt, textAlign:'center', lineHeight:1.6 }}>
                   Laporan diverifikasi sebelum dipublikasikan
                 </p>
               </div>
@@ -485,70 +712,48 @@ export default function ReportPage() {
         </div>
       </div>
 
-      {/* ══ MOBILE STICKY FOOTER — identik pola DonatePage ══ */}
+      {/* ════════════════════════════════════════════════════════
+          MOBILE STICKY FOOTER — identical to DonatePage
+      ════════════════════════════════════════════════════════ */}
       <div className="mob-footer">
-        {/* Mini summary — sama dengan DonatePage mini summary */}
-        <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', marginBottom:10, padding:'0 2px' }}>
-          <div style={{ display:'flex', alignItems:'center', gap:10 }}>
-            <div style={{ width:38, height:38, borderRadius:10, background:C.green, display:'flex', alignItems:'center', justifyContent:'center' }}>
-              <span style={{ fontSize:20 }}>{activeType?.emoji}</span>
-            </div>
-            <div>
-              <p style={{ fontFamily:"'Syne',sans-serif", fontSize:14, fontWeight:700, color:C.textDk, lineHeight:1 }}>
-                {form.title || 'Isi judul dulu…'}
-              </p>
-              <div style={{ display:'flex', alignItems:'center', gap:5, marginTop:3 }}>
-                <span style={{ display:'inline-flex', alignItems:'center', gap:4, background:activeSev?.bg, color:activeSev?.color, borderRadius:99, padding:'2px 8px', fontFamily:"'DM Sans',sans-serif", fontSize:11, fontWeight:600 }}>
-                  <span style={{ width:5, height:5, borderRadius:'50%', background:activeSev?.color }}/>
-                  {activeSev?.label}
-                </span>
-              </div>
-            </div>
+        {/* Mini summary row */}
+        <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between',
+          marginBottom:10, padding:'0 2px' }}>
+          <div style={{ display:'flex', alignItems:'center', gap:8 }}>
+            {/* Severity badge */}
+            <span style={{ display:'inline-flex', alignItems:'center', gap:4,
+              background:activeSev?.bg, color:activeSev?.color,
+              borderRadius:99, padding:'4px 10px',
+              fontFamily:"'DM Sans',sans-serif", fontSize:11.5, fontWeight:600 }}>
+              <span style={{ width:6, height:6, borderRadius:'50%', background:activeSev?.color }}/>
+              {activeSev?.label}
+            </span>
+            <span style={{ fontFamily:"'DM Sans',sans-serif", fontSize:12, color:C.textLt }}>
+              {activeType?.emoji} {activeType?.label}
+            </span>
           </div>
-          {/* Progress dots — sama dengan DonatePage */}
-          <div style={{ display:'flex', gap:5 }}>
+          {/* Progress dots */}
+          <div style={{ display:'flex', gap:4 }}>
             {progress.map((done, i) => (
-              <span key={i} style={{ width:8, height:8, borderRadius:'50%', background:done?C.lime:C.border, transition:'background .3s' }}/>
+              <span key={i} style={{ width:8, height:8, borderRadius:'50%',
+                background: done ? C.lime : C.border, transition:'background .3s' }}/>
             ))}
           </div>
         </div>
 
-        <button type="button" className="btn-submit" style={{ fontSize:15.5, padding:'15px 15px 15px 26px' }}
+        {/* Submit button */}
+        <button type="button" className="btn-submit"
+          style={{ fontSize:15.5, padding:'15px 15px 15px 26px' }}
           onClick={() => formRef.current?.requestSubmit()}
           disabled={loading}>
-          {loading?'Mengirim…':<>Kirim Laporan <span className="ic" style={{ width:40, height:40 }}><ArrowRight size={16} color={C.lime}/></span></>}
+          {loading
+            ? 'Mengirim…'
+            : <>Kirim Laporan <span className="ic" style={{ width:40, height:40 }}>
+                <ArrowRight size={16} color={C.lime}/>
+              </span></>
+          }
         </button>
       </div>
     </>
-  );
-}
-
-/* ── Komponen lokasi fields — reusable ── */
-function LokasiFields({ form, set, errors }) {
-  return (
-    <div style={{ display:'flex', flexDirection:'column', gap:14 }}>
-      <div className="coord-row" style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:12 }}>
-        <div>
-          <label className="f-label">Latitude <span style={{ color:'#ef4444' }}>*</span></label>
-          <input value={form.lat} onChange={e=>set('lat',e.target.value)} placeholder="-6.200000" inputMode="decimal" className={`f-input${errors?.lat?' err':''}`}/>
-          {errors?.lat && <p className="err-msg">{errors.lat[0]}</p>}
-        </div>
-        <div>
-          <label className="f-label">Longitude <span style={{ color:'#ef4444' }}>*</span></label>
-          <input value={form.lng} onChange={e=>set('lng',e.target.value)} placeholder="106.800000" inputMode="decimal" className={`f-input${errors?.lng?' err':''}`}/>
-          {errors?.lng && <p className="err-msg">{errors.lng[0]}</p>}
-        </div>
-      </div>
-      <div>
-        <label className="f-label">Nama Lokasi</label>
-        <input value={form.location_text} onChange={e=>set('location_text',e.target.value)} placeholder="Contoh: Kalimantan Tengah, Kab. Kotawaringin" className="f-input"/>
-      </div>
-      <div style={{ display:'flex', alignItems:'flex-start', gap:9, background:'rgba(14,165,233,.06)', border:'1px solid rgba(14,165,233,.12)', borderRadius:12, padding:'11px 14px' }}>
-        <Info size={14} color='#0ea5e9' style={{ flexShrink:0, marginTop:1 }}/>
-        <p style={{ fontFamily:"'DM Sans',sans-serif", fontSize:12.5, color:'#4a5544', lineHeight:1.55 }}>
-          Klik <strong>Deteksi Otomatis</strong> atau salin koordinat dari Google Maps.
-        </p>
-      </div>
-    </div>
   );
 }
