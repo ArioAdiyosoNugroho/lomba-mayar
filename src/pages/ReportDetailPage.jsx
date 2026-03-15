@@ -4,9 +4,9 @@ import api from '../services/api';
 import { useAuth } from '../context/AuthContext';
 import toast from 'react-hot-toast';
 import {
-  MapPin, ThumbsUp, MessageCircle, Calendar, AlertTriangle,
-  ArrowLeft, X, ZoomIn, ArrowRight, Flame, Axe, Tractor,
-  Hammer, TreePine, Send,
+  MapPin, ThumbsUp, MessageCircle, Calendar, ArrowLeft,
+  X, ZoomIn, ArrowRight, Flame, Axe, Tractor,
+  Hammer, TreePine, Send, Share2,
 } from 'lucide-react';
 
 if (!document.getElementById('detail-fonts')) {
@@ -17,106 +17,64 @@ if (!document.getElementById('detail-fonts')) {
 }
 
 const C = {
-  green   : '#1b3a2b',
-  greenMd : '#2d6a4f',
-  lime    : '#b5e235',
-  limeHov : '#c8f24d',
-  offWhite: '#f5f5f0',
-  textDk  : '#0f1a10',
-  textMd  : '#4a5544',
-  textLt  : '#8a9984',
-  border  : 'rgba(0,0,0,.08)',
+  green:'#1b3a2b', greenMd:'#2d6a4f', lime:'#b5e235', limeHov:'#c8f24d',
+  offWhite:'#f5f5f0', textDk:'#0f1a10', textMd:'#4a5544', textLt:'#8a9984',
+  border:'rgba(0,0,0,.08)',
 };
 
 const SEVERITY = {
-  low:      { color:'#3b82f6', label:'Rendah',  bg:'#eff6ff', text:'#1d4ed8', dot:'#3b82f6' },
-  medium:   { color:'#f59e0b', label:'Sedang',  bg:'#fffbeb', text:'#b45309', dot:'#f59e0b' },
-  high:     { color:'#f97316', label:'Tinggi',  bg:'#fff7ed', text:'#c2410c', dot:'#f97316' },
-  critical: { color:'#ef4444', label:'Kritis',  bg:'#fef2f2', text:'#b91c1c', dot:'#ef4444' },
+  low:      { color:'#3b82f6', label:'Rendah',  bg:'#eff6ff', text:'#1d4ed8' },
+  medium:   { color:'#f59e0b', label:'Sedang',  bg:'#fffbeb', text:'#b45309' },
+  high:     { color:'#f97316', label:'Tinggi',  bg:'#fff7ed', text:'#c2410c' },
+  critical: { color:'#ef4444', label:'Kritis',  bg:'#fef2f2', text:'#b91c1c' },
 };
 const STATUS = {
   pending:  { bg:'#fffbeb', text:'#b45309', label:'Menunggu Verifikasi' },
-  verified: { bg:'#f0fdf4', text:'#15803d', label:'Terverifikasi' },
+  verified: { bg:'#f0fdf4', text:'#15803d', label:'✓ Terverifikasi' },
   resolved: { bg:'#eff6ff', text:'#1d4ed8', label:'Selesai Ditangani' },
   rejected: { bg:'#fef2f2', text:'#b91c1c', label:'Ditolak' },
 };
 const TYPE_MAP = {
-  sawit_expansion: { icon:TreePine, label:'Ekspansi Sawit' },
-  illegal_logging: { icon:Axe,      label:'Penebangan Liar' },
-  forest_fire:     { icon:Flame,    label:'Kebakaran Hutan' },
-  land_clearing:   { icon:Tractor,  label:'Buka Lahan' },
-  mining:          { icon:Hammer,   label:'Tambang Ilegal' },
-  other:           { icon:MapPin,   label:'Lainnya' },
+  sawit_expansion:{ icon:TreePine, label:'Ekspansi Sawit' },
+  illegal_logging:{ icon:Axe,     label:'Penebangan Liar' },
+  forest_fire:    { icon:Flame,   label:'Kebakaran Hutan' },
+  land_clearing:  { icon:Tractor, label:'Buka Lahan' },
+  mining:         { icon:Hammer,  label:'Tambang Ilegal' },
+  other:          { icon:MapPin,  label:'Lainnya' },
 };
 
 const CSS = `
-  *, *::before, *::after { box-sizing:border-box; margin:0; padding:0; }
-  body { font-family:'DM Sans',sans-serif; background:${C.offWhite}; }
+  *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:'DM Sans',sans-serif;background:${C.offWhite}}
+  @keyframes fadeUp{from{opacity:0;transform:translateY(18px)}to{opacity:1;transform:translateY(0)}}
+  @keyframes spin{to{transform:rotate(360deg)}}
+  @keyframes pulse-lime{0%,100%{box-shadow:0 0 0 0 rgba(181,226,53,.55)}60%{box-shadow:0 0 0 7px rgba(181,226,53,0)}}
+  .fu{animation:fadeUp .65s cubic-bezier(.16,1,.3,1) both}
+  .d1{animation-delay:.06s}.d2{animation-delay:.14s}.d3{animation-delay:.22s}.d4{animation-delay:.30s}.d5{animation-delay:.38s}
 
-  @keyframes fadeUp { from{opacity:0;transform:translateY(18px)} to{opacity:1;transform:translateY(0)} }
-  @keyframes spin   { to{transform:rotate(360deg)} }
-  .fu  { animation:fadeUp .65s cubic-bezier(.16,1,.3,1) both; }
-  .d1  { animation-delay:.06s; }
-  .d2  { animation-delay:.14s; }
-  .d3  { animation-delay:.22s; }
-  .d4  { animation-delay:.30s; }
-  .d5  { animation-delay:.38s; }
+  .back-link{display:inline-flex;align-items:center;gap:6px;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:500;color:rgba(255,255,255,.5);text-decoration:none;transition:color .18s;padding:6px 0}
+  .back-link:hover{color:rgba(255,255,255,.9)}
 
-  .back-link {
-    display:inline-flex; align-items:center; gap:6px;
-    font-family:'DM Sans',sans-serif; font-size:13px; font-weight:500;
-    color:rgba(255,255,255,.5); text-decoration:none;
-    transition:color .18s; padding:6px 0;
-  }
-  .back-link:hover { color:rgba(255,255,255,.9); }
+  .action-pill{display:inline-flex;align-items:center;gap:7px;background:#fff;border:1.5px solid ${C.border};color:${C.textMd};padding:9px 18px;border-radius:99px;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:500;cursor:pointer;transition:all .18s;text-decoration:none}
+  .action-pill:hover{border-color:${C.greenMd};color:${C.greenMd};background:rgba(45,106,79,.04)}
+  .action-pill.voted{border-color:${C.greenMd};color:${C.greenMd};background:rgba(45,106,79,.06)}
 
-  .vote-btn {
-    display:inline-flex; align-items:center; gap:8px;
-    background:#fff; border:1.5px solid ${C.border};
-    color:${C.textMd}; padding:10px 20px; border-radius:99px;
-    font-family:'DM Sans',sans-serif; font-size:13.5px; font-weight:500;
-    cursor:pointer; transition:all .2s;
-  }
-  .vote-btn:hover { border-color:${C.greenMd}; color:${C.greenMd}; background:rgba(45,106,79,.04); }
-  .vote-btn.voted { border-color:${C.greenMd}; color:${C.greenMd}; background:rgba(45,106,79,.06); }
+  .donate-btn{display:inline-flex;align-items:center;gap:8px;background:${C.lime};color:${C.textDk};padding:10px 10px 10px 20px;border-radius:99px;font-family:'DM Sans',sans-serif;font-size:13.5px;font-weight:600;text-decoration:none;transition:background .2s,transform .2s;border:none;cursor:pointer}
+  .donate-btn:hover{background:${C.limeHov};transform:translateY(-2px)}
+  .donate-btn .ac{width:28px;height:28px;border-radius:50%;background:${C.textDk};display:flex;align-items:center;justify-content:center}
 
-  .donate-btn {
-    display:inline-flex; align-items:center; gap:8px;
-    background:${C.lime}; color:${C.textDk};
-    padding:10px 10px 10px 20px; border-radius:99px;
-    font-family:'DM Sans',sans-serif; font-size:13.5px; font-weight:600;
-    text-decoration:none; transition:background .2s, transform .2s;
-  }
-  .donate-btn:hover { background:${C.limeHov}; transform:translateY(-2px); }
-  .donate-btn .ac {
-    width:28px; height:28px; border-radius:50%; background:${C.textDk};
-    display:flex; align-items:center; justify-content:center;
-  }
+  .comment-input{flex:1;background:${C.offWhite};border:1.5px solid ${C.border};border-radius:99px;padding:11px 20px;font-family:'DM Sans',sans-serif;font-size:13.5px;color:${C.textDk};outline:none;transition:border-color .2s,background .2s}
+  .comment-input:focus{border-color:${C.greenMd};background:#fff}
+  .comment-input::placeholder{color:${C.textLt}}
 
-  .comment-input {
-    flex:1; background:${C.offWhite}; border:1.5px solid ${C.border};
-    border-radius:99px; padding:11px 20px;
-    font-family:'DM Sans',sans-serif; font-size:13.5px; color:${C.textDk};
-    outline:none; transition:border-color .2s, background .2s;
-  }
-  .comment-input:focus { border-color:${C.greenMd}; background:#fff; }
-  .comment-input::placeholder { color:${C.textLt}; }
+  .send-btn{width:42px;height:42px;border-radius:50%;flex-shrink:0;background:${C.green};color:#fff;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:background .2s,transform .2s}
+  .send-btn:hover{background:${C.greenMd};transform:scale(1.06)}
+  .send-btn:disabled{opacity:.4;cursor:not-allowed}
 
-  .send-btn {
-    width:42px; height:42px; border-radius:50%; flex-shrink:0;
-    background:${C.green}; color:#fff; border:none; cursor:pointer;
-    display:flex; align-items:center; justify-content:center;
-    transition:background .2s, transform .2s;
-  }
-  .send-btn:hover { background:${C.greenMd}; transform:scale(1.06); }
-  .send-btn:disabled { opacity:.4; cursor:not-allowed; }
-
-  @media (max-width:640px) {
-    .hero-inner   { padding:16px 20px 40px !important; }
-    .hero-title   { font-size:36px !important; letter-spacing:-1px !important; }
-    .content-wrap { padding:0 20px !important; }
-    .stat-grid    { grid-template-columns:1fr !important; }
-  }
+  /* Sidebar sticky */
+  .detail-layout{display:grid;grid-template-columns:1fr 320px;gap:20px;align-items:start}
+  @media(max-width:1024px){.detail-layout{grid-template-columns:1fr !important}}
+  @media(max-width:640px){.hero-inner{padding:16px 20px 40px !important}.hero-title{font-size:34px !important;letter-spacing:-1px !important}.content-wrap{padding:0 16px !important}}
 `;
 
 function PhotoModal({ src, alt, onClose }) {
@@ -126,25 +84,12 @@ function PhotoModal({ src, alt, onClose }) {
     return () => window.removeEventListener('keydown', h);
   }, [onClose]);
   return (
-    <div onClick={onClose} style={{
-      position:'fixed', inset:0, zIndex:9999,
-      background:'rgba(0,0,0,.92)', backdropFilter:'blur(10px)',
-      display:'flex', alignItems:'center', justifyContent:'center', padding:20,
-    }}>
-      <button onClick={onClose} style={{
-        position:'absolute', top:20, right:20,
-        background:'rgba(255,255,255,.1)', border:'1px solid rgba(255,255,255,.15)',
-        borderRadius:'50%', width:40, height:40,
-        display:'flex', alignItems:'center', justifyContent:'center',
-        cursor:'pointer', color:'#fff',
-      }}><X size={18}/></button>
-      <img src={src} alt={alt} onClick={e => e.stopPropagation()}
-        style={{ maxWidth:'100%', maxHeight:'88vh', objectFit:'contain', borderRadius:16 }}/>
-      <p style={{
-        position:'absolute', bottom:18,
-        fontFamily:"'DM Sans',sans-serif", fontSize:12,
-        color:'rgba(255,255,255,.28)',
-      }}>
+    <div onClick={onClose} style={{ position:'fixed', inset:0, zIndex:9999, background:'rgba(0,0,0,.92)', backdropFilter:'blur(10px)', display:'flex', alignItems:'center', justifyContent:'center', padding:20 }}>
+      <button onClick={onClose} style={{ position:'absolute', top:20, right:20, background:'rgba(255,255,255,.1)', border:'1px solid rgba(255,255,255,.15)', borderRadius:'50%', width:40, height:40, display:'flex', alignItems:'center', justifyContent:'center', cursor:'pointer', color:'#fff' }}>
+        <X size={18}/>
+      </button>
+      <img src={src} alt={alt} onClick={e => e.stopPropagation()} style={{ maxWidth:'100%', maxHeight:'88vh', objectFit:'contain', borderRadius:16 }}/>
+      <p style={{ position:'absolute', bottom:18, fontFamily:"'DM Sans',sans-serif", fontSize:12, color:'rgba(255,255,255,.28)' }}>
         Tekan <kbd style={{ background:'rgba(255,255,255,.1)', padding:'2px 7px', borderRadius:5 }}>Esc</kbd> untuk menutup
       </p>
     </div>
@@ -188,21 +133,22 @@ export default function ReportDetailPage() {
     finally { setSubmitting(false); }
   };
 
+  const share = () => {
+    navigator.clipboard?.writeText(window.location.href);
+    toast.success('Link disalin!');
+  };
+
   if (loading) return (
-    <>
-      <style>{CSS}</style>
-      <div style={{ display:'flex', justifyContent:'center', alignItems:'center', minHeight:'100vh', background:C.offWhite }}>
-        <div style={{ width:44, height:44, borderRadius:'50%', border:`3px solid ${C.border}`, borderTopColor:C.greenMd, animation:'spin 1s linear infinite' }}/>
-      </div>
-    </>
+    <><style>{CSS}</style>
+    <div style={{ display:'flex', justifyContent:'center', alignItems:'center', minHeight:'100vh', background:C.offWhite }}>
+      <div style={{ width:44, height:44, borderRadius:'50%', border:`3px solid ${C.border}`, borderTopColor:C.greenMd, animation:'spin 1s linear infinite' }}/>
+    </div></>
   );
   if (!report) return (
-    <>
-      <style>{CSS}</style>
-      <div style={{ textAlign:'center', paddingTop:120, fontFamily:"'DM Sans',sans-serif", color:C.textLt, background:C.offWhite, minHeight:'100vh' }}>
-        Laporan tidak ditemukan.
-      </div>
-    </>
+    <><style>{CSS}</style>
+    <div style={{ textAlign:'center', paddingTop:120, fontFamily:"'DM Sans',sans-serif", color:C.textLt, background:C.offWhite, minHeight:'100vh' }}>
+      Laporan tidak ditemukan.
+    </div></>
   );
 
   const sv    = SEVERITY[report.severity] ?? SEVERITY.low;
@@ -217,57 +163,39 @@ export default function ReportDetailPage() {
         <PhotoModal src={report.photo_url} alt={report.title} onClose={() => setShowPhoto(false)}/>
       )}
 
-      {/* ══ HERO ══════════════════════════════════════════════════ */}
+      {/* ══ HERO — persis ritme dengan HomePage ══ */}
       <div style={{ background:C.green, position:'relative', overflow:'hidden' }}>
-        {/* Decorative */}
-        <div style={{ position:'absolute', right:-60, top:-60, width:260, height:260, borderRadius:'50%', background:'rgba(181,226,53,.06)', pointerEvents:'none' }}/>
 
-        <div style={{ maxWidth:800, margin:'0 auto' }}>
-          <div style={{ height:80 }}/>
-          <div className="hero-inner fu d1" style={{ padding:'16px 40px 44px' }}>
 
-            <Link to="/map" className="back-link" style={{ marginBottom:18, display:'inline-flex' }}>
+        <div style={{ maxWidth:1160, margin:'0 auto', position:'relative', zIndex:1 }}>
+          <div style={{ height:16 }}/>
+          <div className="hero-inner fu d1" style={{ padding:'16px 60px 0' }}>
+
+            <Link to="/map" className="back-link" style={{ marginBottom:20, display:'inline-flex' }}>
               <ArrowLeft size={13}/> Kembali ke Peta
             </Link>
 
-            {/* Badges row */}
-            <div style={{ display:'flex', gap:7, flexWrap:'wrap', marginBottom:16 }}>
-              <span style={{
-                background:st.bg, color:st.text,
-                borderRadius:99, padding:'4px 12px',
-                fontFamily:"'DM Sans',sans-serif", fontSize:11.5, fontWeight:600,
-              }}>{st.label}</span>
-
-              <span style={{
-                background:'rgba(255,255,255,.1)', color:'rgba(255,255,255,.7)',
-                borderRadius:99, padding:'4px 12px',
-                fontFamily:"'DM Sans',sans-serif", fontSize:11.5, fontWeight:500,
-                display:'flex', alignItems:'center', gap:5,
-              }}>
+            {/* Badges */}
+            <div style={{ display:'flex', gap:7, flexWrap:'wrap', marginBottom:18 }}>
+              <span style={{ background:st.bg, color:st.text, borderRadius:99, padding:'4px 13px', fontFamily:"'DM Sans',sans-serif", fontSize:11.5, fontWeight:600 }}>
+                {st.label}
+              </span>
+              <span style={{ background:'rgba(255,255,255,.1)', color:'rgba(255,255,255,.7)', borderRadius:99, padding:'4px 13px', fontFamily:"'DM Sans',sans-serif", fontSize:11.5, fontWeight:500, display:'flex', alignItems:'center', gap:5 }}>
                 <TIcon size={11}/> {ti.label}
               </span>
-
-              <span style={{
-                background:'rgba(255,255,255,.1)',
-                borderRadius:99, padding:'4px 12px',
-                fontFamily:"'DM Sans',sans-serif", fontSize:11.5,
-                display:'flex', alignItems:'center', gap:5,
-                color:'rgba(255,255,255,.7)',
-              }}>
-                <span style={{ width:7, height:7, borderRadius:'50%', background:sv.dot, display:'inline-block' }}/>
-                Tingkat {sv.label}
+              <span style={{ background:'rgba(255,255,255,.1)', color:'rgba(255,255,255,.7)', borderRadius:99, padding:'4px 13px', fontFamily:"'DM Sans',sans-serif", fontSize:11.5, display:'flex', alignItems:'center', gap:5 }}>
+                <span style={{ width:7, height:7, borderRadius:'50%', background:sv.color, display:'inline-block' }}/>
+                {sv.label}
               </span>
             </div>
 
-            {/* Title */}
-            <h1 className="hero-title" style={{
-              fontFamily:"'Syne',sans-serif", fontWeight:800,
-              fontSize:48, lineHeight:1.02, letterSpacing:'-1.8px',
-              color:'#fff', marginBottom:16, maxWidth:680,
-            }}>{report.title}</h1>
+            {/* Title — besar seperti homepage hero */}
+            <h1 className="hero-title" style={{ fontFamily:"'Syne',sans-serif", fontWeight:800, fontSize:58, lineHeight:.97, letterSpacing:'-2.5px', color:'#fff', marginBottom:18, maxWidth:760 }}>
+              {report.title}
+            </h1>
 
-            {/* Meta */}
-            <div style={{ display:'flex', flexWrap:'wrap', gap:18 }}>
+            {/* Meta row */}
+            <div style={{ display:'flex', flexWrap:'wrap', gap:18, paddingBottom:0 }}>
               {report.location_text && (
                 <span style={{ display:'flex', alignItems:'center', gap:5, fontFamily:"'DM Sans',sans-serif", fontSize:13, color:'rgba(255,255,255,.45)' }}>
                   <MapPin size={12} color={C.lime}/> {report.location_text}
@@ -278,200 +206,224 @@ export default function ReportDetailPage() {
                 {new Date(report.created_at).toLocaleDateString('id-ID', { day:'numeric', month:'long', year:'numeric' })}
               </span>
               {report.user?.name && (
-                <span style={{ display:'flex', alignItems:'center', gap:5, fontFamily:"'DM Sans',sans-serif", fontSize:13, color:'rgba(255,255,255,.45)' }}>
-                  Dilaporkan oleh
-                  <strong style={{ color:'rgba(255,255,255,.7)', fontWeight:600 }}>{report.user.name}</strong>
+                <span style={{ fontFamily:"'DM Sans',sans-serif", fontSize:13, color:'rgba(255,255,255,.45)' }}>
+                  Dilaporkan oleh <strong style={{ color:'rgba(255,255,255,.7)', fontWeight:600 }}>{report.user.name}</strong>
                 </span>
               )}
             </div>
           </div>
+
+          {/* ── Hero image — persis seperti HomePage image strip ── */}
+          {report.photo_url && (
+            <div className="fu d2" style={{ margin:'24px 20px 0', position:'relative', cursor:'zoom-in' }} onClick={() => setShowPhoto(true)}>
+              <div style={{ height:360, borderRadius:'18px 18px 0 0', overflow:'hidden', position:'relative', background:'#0f2318' }}>
+                <img src={report.photo_url} alt={report.title}
+                  style={{ width:'100%', height:'100%', objectFit:'cover', display:'block', transition:'transform .6s ease' }}
+                  onMouseEnter={e => e.target.style.transform='scale(1.03)'}
+                  onMouseLeave={e => e.target.style.transform='scale(1)'}
+                />
+                <div style={{ position:'absolute', inset:0, background:'linear-gradient(to top,rgba(5,16,9,.6) 0%,transparent 55%)' }}/>
+                {/* Zoom hint */}
+                <div style={{ position:'absolute', bottom:16, right:16, background:'rgba(255,255,255,.88)', backdropFilter:'blur(8px)', borderRadius:99, padding:'6px 14px', display:'flex', alignItems:'center', gap:6, fontFamily:"'DM Sans',sans-serif", fontSize:12, color:C.textMd }}>
+                  <ZoomIn size={12}/> Perbesar
+                </div>
+                {/* Severity badge di foto */}
+                <div style={{ position:'absolute', top:16, left:16, background:'rgba(5,14,8,.72)', backdropFilter:'blur(12px)', border:`1px solid ${sv.color}44`, borderRadius:99, padding:'6px 14px', display:'flex', alignItems:'center', gap:7 }}>
+                  <span style={{ width:7, height:7, borderRadius:'50%', background:sv.color, animation:'pulse-lime 2s infinite', display:'inline-block' }}/>
+                  <span style={{ fontFamily:"'DM Sans',sans-serif", fontSize:12, color:'#fff', fontWeight:500 }}>Tingkat {sv.label}</span>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Jika tidak ada foto, beri padding bawah */}
+          {!report.photo_url && <div style={{ height:32 }}/>}
         </div>
       </div>
 
-      {/* ══ CONTENT ═══════════════════════════════════════════════ */}
-      <div style={{ background:C.offWhite, padding:'32px 0 88px' }}>
-        <div className="content-wrap" style={{ maxWidth:800, margin:'0 auto', padding:'0 40px', display:'flex', flexDirection:'column', gap:14 }}>
+      {/* ══ CONTENT — two-column layout ══ */}
+      <div style={{ background:C.offWhite, padding:'28px 0 88px' }}>
+        <div className="content-wrap" style={{ maxWidth:1160, margin:'0 auto', padding:'0 60px' }}>
+          <div className="detail-layout fu d3">
 
-          {/* ── Foto ── */}
-          {report.photo_url && (
-            <div className="fu d2" onClick={() => setShowPhoto(true)} style={{
-              position:'relative', height:360, borderRadius:24,
-              overflow:'hidden', cursor:'zoom-in', background:C.green,
-              boxShadow:'0 8px 32px rgba(0,0,0,.1)',
-            }}>
-              <img
-                src={report.photo_url} alt={report.title}
-                style={{ width:'100%', height:'100%', objectFit:'cover', transition:'transform .5s ease' }}
-                onMouseEnter={e => e.target.style.transform='scale(1.03)'}
-                onMouseLeave={e => e.target.style.transform='scale(1)'}
-              />
-              <div style={{ position:'absolute', inset:0, background:'linear-gradient(to top,rgba(0,0,0,.3) 0%,transparent 50%)' }}/>
-              <div style={{
-                position:'absolute', bottom:14, right:14,
-                background:'rgba(255,255,255,.88)', backdropFilter:'blur(8px)',
-                borderRadius:99, padding:'6px 14px',
-                display:'flex', alignItems:'center', gap:6,
-                fontFamily:"'DM Sans',sans-serif", fontSize:12, color:C.textMd,
-              }}>
-                <ZoomIn size={12}/> Perbesar
-              </div>
-            </div>
-          )}
+            {/* ── Kolom kiri: main content ── */}
+            <div style={{ display:'flex', flexDirection:'column', gap:14, minWidth:0 }}>
 
-          {/* ── Deskripsi ── */}
-          <div className="fu d2" style={{ background:'#fff', borderRadius:22, padding:'28px 32px', border:`1px solid ${C.border}` }}>
-            <p style={{ fontFamily:"'DM Sans',sans-serif", fontSize:11, color:C.textLt, fontWeight:700, letterSpacing:'.9px', textTransform:'uppercase', marginBottom:14 }}>
-              Deskripsi Laporan
-            </p>
-            <p style={{ fontFamily:"'DM Sans',sans-serif", fontSize:15, color:C.textMd, lineHeight:1.9 }}>
-              {report.description}
-            </p>
-          </div>
-
-          {/* ── Stat cards ── */}
-          {(report.area_affected || report.trees_lost) && (
-            <div className="stat-grid fu d3" style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:12 }}>
-              {report.area_affected && (
-                <div style={{
-                  background:'#fff7ed', border:'1px solid #fed7aa',
-                  borderRadius:22, padding:'28px 24px', textAlign:'center',
-                }}>
-                  <p style={{ fontFamily:"'DM Sans',sans-serif", fontSize:11, color:'#9a3412', fontWeight:700, letterSpacing:'.9px', textTransform:'uppercase', marginBottom:10 }}>Luas Terdampak</p>
-                  <p style={{ fontFamily:"'Syne',sans-serif", fontSize:52, fontWeight:800, color:'#f97316', lineHeight:1 }}>{report.area_affected}</p>
-                  <p style={{ fontFamily:"'DM Sans',sans-serif", fontSize:13, color:'#c2410c', marginTop:6 }}>Hektar</p>
-                </div>
-              )}
-              {report.trees_lost && (
-                <div style={{
-                  background:'#fef2f2', border:'1px solid #fecaca',
-                  borderRadius:22, padding:'28px 24px', textAlign:'center',
-                }}>
-                  <p style={{ fontFamily:"'DM Sans',sans-serif", fontSize:11, color:'#991b1b', fontWeight:700, letterSpacing:'.9px', textTransform:'uppercase', marginBottom:10 }}>Pohon Hilang</p>
-                  <p style={{ fontFamily:"'Syne',sans-serif", fontSize:52, fontWeight:800, color:'#ef4444', lineHeight:1 }}>{report.trees_lost?.toLocaleString('id')}</p>
-                  <p style={{ fontFamily:"'DM Sans',sans-serif", fontSize:13, color:'#b91c1c', marginTop:6 }}>Pohon</p>
-                </div>
-              )}
-            </div>
-          )}
-
-          {/* ── Action bar ── */}
-          <div className="fu d3" style={{
-            background:'#fff', borderRadius:22, padding:'18px 24px',
-            border:`1px solid ${C.border}`,
-            display:'flex', alignItems:'center', gap:12, flexWrap:'wrap',
-          }}>
-            <button onClick={vote} className="vote-btn">
-              <ThumbsUp size={15}/>
-              <span>{report.upvotes}</span>
-              <span style={{ color:C.textLt, fontWeight:400 }}>Vote</span>
-            </button>
-            <div style={{ display:'flex', alignItems:'center', gap:6, color:C.textLt, fontFamily:"'DM Sans',sans-serif", fontSize:13.5 }}>
-              <MessageCircle size={15}/>
-              {report.comments?.length || 0} komentar
-            </div>
-            <div style={{ flex:1 }}/>
-            <Link to="/donate" className="donate-btn">
-              🌱 Tanam Pohon di Sini
-              <span className="ac"><ArrowRight size={12} color={C.lime}/></span>
-            </Link>
-          </div>
-
-          {/* ── Komentar ── */}
-          <div className="fu d4">
-            <h3 style={{
-              fontFamily:"'Syne',sans-serif", fontSize:19, fontWeight:700,
-              color:C.textDk, marginBottom:14,
-            }}>
-              Komentar
-              <span style={{ fontFamily:"'DM Sans',sans-serif", fontSize:15, fontWeight:400, color:C.textLt, marginLeft:8 }}>
-                {report.comments?.length || 0}
-              </span>
-            </h3>
-
-            {/* Input komentar di atas — sosmed style */}
-            {user && (
-              <form onSubmit={submitComment} style={{ display:'flex', alignItems:'center', gap:10, marginBottom:14 }}>
-                {/* Avatar */}
-                <div style={{
-                  width:38, height:38, borderRadius:'50%', flexShrink:0,
-                  background:C.green, display:'flex', alignItems:'center', justifyContent:'center',
-                  fontFamily:"'Syne',sans-serif", fontSize:14, fontWeight:700, color:C.lime,
-                }}>
-                  {user?.name?.[0]?.toUpperCase() || '?'}
-                </div>
-                <input
-                  value={comment}
-                  onChange={e => setComment(e.target.value)}
-                  placeholder="Tulis komentarmu..."
-                  className="comment-input"
-                />
-                <button type="submit" className="send-btn" disabled={submitting || !comment.trim()}>
-                  <Send size={15}/>
+              {/* Action bar — ala sosmed */}
+              <div style={{ background:'#fff', borderRadius:22, padding:'14px 22px', border:`1px solid ${C.border}`, display:'flex', alignItems:'center', gap:10, flexWrap:'wrap' }}>
+                <button onClick={vote} className={`action-pill${report.upvotes > 0 ? ' voted' : ''}`}>
+                  <ThumbsUp size={14}/> <span style={{ fontWeight:600 }}>{report.upvotes}</span> Dukung
                 </button>
-              </form>
-            )}
+                <div className="action-pill" style={{ cursor:'default' }}>
+                  <MessageCircle size={14}/> {report.comments?.length || 0} Komentar
+                </div>
+                <button onClick={share} className="action-pill">
+                  <Share2 size={14}/> Bagikan
+                </button>
+                <div style={{ flex:1 }}/>
+                <Link to="/donate" className="donate-btn">
+                  🌱 Tanam Pohon
+                  <span className="ac"><ArrowRight size={12} color={C.lime}/></span>
+                </Link>
+              </div>
 
-            {/* List komentar */}
-            <div style={{ display:'flex', flexDirection:'column', gap:1 }}>
-              {report.comments?.length > 0
-                ? report.comments.map((c, idx) => (
-                    <div key={c.id} className="fu" style={{
-                      animationDelay:`${.05 * idx}s`,
-                      display:'flex', gap:12, padding:'14px 0',
-                      borderBottom: idx < report.comments.length - 1 ? `1px solid ${C.border}` : 'none',
-                    }}>
-                      {/* Avatar */}
-                      <div style={{
-                        width:36, height:36, borderRadius:'50%', flexShrink:0,
-                        background:C.green, display:'flex', alignItems:'center',
-                        justifyContent:'center',
-                        fontFamily:"'Syne',sans-serif", fontSize:13, fontWeight:700, color:C.lime,
-                      }}>
-                        {c.user?.name?.[0]?.toUpperCase() || '?'}
-                      </div>
-                      <div style={{ flex:1 }}>
-                        <div style={{ display:'flex', alignItems:'center', gap:8, marginBottom:5 }}>
-                          <span style={{ fontFamily:"'DM Sans',sans-serif", fontSize:13.5, fontWeight:600, color:C.textDk }}>
-                            {c.user?.name || 'Anonim'}
-                          </span>
-                          <span style={{ fontFamily:"'DM Sans',sans-serif", fontSize:12, color:C.textLt }}>
-                            {new Date(c.created_at).toLocaleDateString('id-ID', { day:'numeric', month:'short' })}
-                          </span>
-                        </div>
-                        <p style={{ fontFamily:"'DM Sans',sans-serif", fontSize:14, color:C.textMd, lineHeight:1.7 }}>
-                          {c.body}
-                        </p>
-                      </div>
+              {/* Deskripsi */}
+              <div style={{ background:'#fff', borderRadius:22, padding:'28px 32px', border:`1px solid ${C.border}` }}>
+                <p style={{ fontFamily:"'DM Sans',sans-serif", fontSize:11, color:C.textLt, fontWeight:700, letterSpacing:'1px', textTransform:'uppercase', marginBottom:14 }}>Deskripsi Laporan</p>
+                <p style={{ fontFamily:"'DM Sans',sans-serif", fontSize:15.5, color:C.textMd, lineHeight:1.9 }}>
+                  {report.description}
+                </p>
+              </div>
+
+              {/* Stats jika ada */}
+              {(report.area_affected || report.trees_lost) && (
+                <div style={{ display:'grid', gridTemplateColumns: report.area_affected && report.trees_lost ? '1fr 1fr' : '1fr', gap:12 }}>
+                  {report.area_affected && (
+                    <div style={{ background:'#fff7ed', border:'1px solid #fed7aa', borderRadius:22, padding:'24px', textAlign:'center' }}>
+                      <p style={{ fontFamily:"'DM Sans',sans-serif", fontSize:10.5, color:'#9a3412', fontWeight:700, letterSpacing:'1px', textTransform:'uppercase', marginBottom:10 }}>Luas Terdampak</p>
+                      <p style={{ fontFamily:"'Syne',sans-serif", fontSize:48, fontWeight:800, color:'#f97316', lineHeight:1 }}>{report.area_affected}</p>
+                      <p style={{ fontFamily:"'DM Sans',sans-serif", fontSize:13, color:'#c2410c', marginTop:5 }}>Hektar</p>
                     </div>
-                  ))
-                : (
-                  <div style={{ padding:'28px 0', textAlign:'center' }}>
-                    <p style={{ fontFamily:"'DM Sans',sans-serif", fontSize:13.5, color:C.textLt }}>
-                      Belum ada komentar. Jadilah yang pertama! 💬
-                    </p>
+                  )}
+                  {report.trees_lost && (
+                    <div style={{ background:'#fef2f2', border:'1px solid #fecaca', borderRadius:22, padding:'24px', textAlign:'center' }}>
+                      <p style={{ fontFamily:"'DM Sans',sans-serif", fontSize:10.5, color:'#991b1b', fontWeight:700, letterSpacing:'1px', textTransform:'uppercase', marginBottom:10 }}>Pohon Hilang</p>
+                      <p style={{ fontFamily:"'Syne',sans-serif", fontSize:48, fontWeight:800, color:'#ef4444', lineHeight:1 }}>{report.trees_lost?.toLocaleString('id')}</p>
+                      <p style={{ fontFamily:"'DM Sans',sans-serif", fontSize:13, color:'#b91c1c', marginTop:5 }}>Pohon</p>
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {/* Komentar */}
+              <div style={{ background:'#fff', borderRadius:22, padding:'24px 28px', border:`1px solid ${C.border}` }}>
+                <h3 style={{ fontFamily:"'Syne',sans-serif", fontSize:18, fontWeight:700, color:C.textDk, marginBottom:18, display:'flex', alignItems:'center', gap:8 }}>
+                  <MessageCircle size={18} color={C.greenMd}/>
+                  Komentar
+                  <span style={{ fontFamily:"'DM Sans',sans-serif", fontSize:14, fontWeight:400, color:C.textLt }}>({report.comments?.length || 0})</span>
+                </h3>
+
+                {/* Input */}
+                {user ? (
+                  <form onSubmit={submitComment} style={{ display:'flex', alignItems:'center', gap:10, marginBottom:20 }}>
+                    <div style={{ width:38, height:38, borderRadius:'50%', flexShrink:0, background:C.green, display:'flex', alignItems:'center', justifyContent:'center', fontFamily:"'Syne',sans-serif", fontSize:14, fontWeight:700, color:C.lime }}>
+                      {user?.name?.[0]?.toUpperCase() || '?'}
+                    </div>
+                    <input value={comment} onChange={e => setComment(e.target.value)} placeholder="Tulis komentarmu..." className="comment-input"/>
+                    <button type="submit" className="send-btn" disabled={submitting || !comment.trim()}>
+                      <Send size={15}/>
+                    </button>
+                  </form>
+                ) : (
+                  <div style={{ background:C.offWhite, borderRadius:14, padding:'14px 18px', display:'flex', alignItems:'center', justifyContent:'space-between', marginBottom:20, border:`1px solid ${C.border}` }}>
+                    <p style={{ fontFamily:"'DM Sans',sans-serif", fontSize:13.5, color:C.textMd }}>Login untuk berkomentar</p>
+                    <Link to="/login" style={{ fontFamily:"'DM Sans',sans-serif", fontSize:13, color:C.greenMd, fontWeight:600, textDecoration:'none', borderBottom:`1.5px solid ${C.greenMd}`, paddingBottom:1 }}>Masuk</Link>
                   </div>
-                )
-              }
+                )}
+
+                {/* List */}
+                {report.comments?.length > 0 ? report.comments.map((c, idx) => (
+                  <div key={c.id} style={{ display:'flex', gap:12, padding:'14px 0', borderTop: idx > 0 ? `1px solid ${C.border}` : 'none' }}>
+                    <div style={{ width:36, height:36, borderRadius:'50%', flexShrink:0, background:C.green, display:'flex', alignItems:'center', justifyContent:'center', fontFamily:"'Syne',sans-serif", fontSize:13, fontWeight:700, color:C.lime }}>
+                      {c.user?.name?.[0]?.toUpperCase() || '?'}
+                    </div>
+                    <div style={{ flex:1 }}>
+                      <div style={{ display:'flex', alignItems:'center', gap:8, marginBottom:5 }}>
+                        <span style={{ fontFamily:"'DM Sans',sans-serif", fontSize:13.5, fontWeight:600, color:C.textDk }}>{c.user?.name || 'Anonim'}</span>
+                        <span style={{ fontFamily:"'DM Sans',sans-serif", fontSize:11.5, color:C.textLt }}>
+                          {new Date(c.created_at).toLocaleDateString('id-ID', { day:'numeric', month:'short' })}
+                        </span>
+                      </div>
+                      <p style={{ fontFamily:"'DM Sans',sans-serif", fontSize:14, color:C.textMd, lineHeight:1.7 }}>{c.body}</p>
+                    </div>
+                  </div>
+                )) : (
+                  <div style={{ textAlign:'center', padding:'24px 0' }}>
+                    <p style={{ fontFamily:"'DM Sans',sans-serif", fontSize:13.5, color:C.textLt }}>Belum ada komentar. Jadilah yang pertama! 💬</p>
+                  </div>
+                )}
+              </div>
             </div>
 
-            {!user && (
-              <div style={{
-                marginTop:14, background:'#fff', borderRadius:18,
-                border:`1px solid ${C.border}`, padding:'18px 22px',
-                display:'flex', alignItems:'center', justifyContent:'space-between', gap:16,
-              }}>
-                <p style={{ fontFamily:"'DM Sans',sans-serif", fontSize:13.5, color:C.textMd }}>
-                  Login untuk ikut berkomentar
-                </p>
-                <Link to="/login" style={{
-                  fontFamily:"'DM Sans',sans-serif", fontSize:13, color:C.greenMd,
-                  fontWeight:600, textDecoration:'none',
-                  borderBottom:`1.5px solid ${C.greenMd}`, paddingBottom:1,
-                }}>Masuk</Link>
-              </div>
-            )}
-          </div>
+            {/* ── Kolom kanan: sidebar sticky ── */}
+            <div style={{ display:'flex', flexDirection:'column', gap:14 }}>
 
+              {/* Reporter info */}
+              {report.user && (
+                <div className="fu d3" style={{ background:'#fff', borderRadius:22, padding:'22px', border:`1px solid ${C.border}` }}>
+                  <p style={{ fontFamily:"'DM Sans',sans-serif", fontSize:10.5, color:C.textLt, fontWeight:700, letterSpacing:'1px', textTransform:'uppercase', marginBottom:14 }}>Pelapor</p>
+                  <div style={{ display:'flex', alignItems:'center', gap:12 }}>
+                    <div style={{ width:46, height:46, borderRadius:'50%', flexShrink:0, background:C.green, border:`2px solid ${C.lime}33`, display:'flex', alignItems:'center', justifyContent:'center', fontFamily:"'Syne',sans-serif", fontSize:18, fontWeight:800, color:C.lime }}>
+                      {report.user.name?.[0]?.toUpperCase()}
+                    </div>
+                    <div>
+                      <p style={{ fontFamily:"'DM Sans',sans-serif", fontSize:14, fontWeight:600, color:C.textDk }}>{report.user.name}</p>
+                      {report.user.total_trees_planted > 0 && (
+                        <p style={{ fontFamily:"'DM Sans',sans-serif", fontSize:12, color:C.textLt, marginTop:2 }}>
+                          🌱 {report.user.total_trees_planted} pohon ditanam
+                        </p>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* Detail info */}
+              <div className="fu d3" style={{ background:'#fff', borderRadius:22, padding:'22px', border:`1px solid ${C.border}` }}>
+                <p style={{ fontFamily:"'DM Sans',sans-serif", fontSize:10.5, color:C.textLt, fontWeight:700, letterSpacing:'1px', textTransform:'uppercase', marginBottom:14 }}>Detail Laporan</p>
+                {[
+                  { label:'Jenis', value: ti.label },
+                  { label:'Tingkat', value: sv.label, color: sv.text, bg: sv.bg },
+                  { label:'Status', value: st.label, color: STATUS[report.status]?.text, bg: STATUS[report.status]?.bg },
+                  { label:'Tanggal', value: new Date(report.created_at).toLocaleDateString('id-ID', { day:'numeric', month:'long', year:'numeric' }) },
+                  report.location_text && { label:'Lokasi', value: report.location_text },
+                ].filter(Boolean).map(({ label, value, color, bg }) => (
+                  <div key={label} style={{ display:'flex', justifyContent:'space-between', alignItems:'center', padding:'9px 0', borderBottom:`1px solid ${C.border}` }}>
+                    <span style={{ fontFamily:"'DM Sans',sans-serif", fontSize:12.5, color:C.textLt }}>{label}</span>
+                    {color ? (
+                      <span style={{ background:bg, color, borderRadius:99, padding:'2px 10px', fontFamily:"'DM Sans',sans-serif", fontSize:11.5, fontWeight:600 }}>{value}</span>
+                    ) : (
+                      <span style={{ fontFamily:"'DM Sans',sans-serif", fontSize:12.5, fontWeight:500, color:C.textDk, textAlign:'right', maxWidth:160 }}>{value}</span>
+                    )}
+                  </div>
+                ))}
+              </div>
+
+              {/* CTA donasi — sama seperti CTASection di homepage */}
+              <div className="fu d4" style={{ background:C.green, borderRadius:22, padding:'26px', position:'relative', overflow:'hidden' }}>
+                <div style={{ position:'absolute', right:-30, top:-30, width:120, height:120, borderRadius:'50%', background:'rgba(181,226,53,.08)', pointerEvents:'none' }}/>
+                <p style={{ fontFamily:"'DM Sans',sans-serif", fontSize:10.5, color:C.lime, fontWeight:600, letterSpacing:'1.5px', textTransform:'uppercase', marginBottom:10, position:'relative' }}>Ambil Aksi</p>
+                <p style={{ fontFamily:"'Syne',sans-serif", fontSize:20, fontWeight:700, color:'#fff', lineHeight:1.2, marginBottom:10, position:'relative' }}>
+                  Pulihkan hutan<br/><span style={{ color:C.lime }}>dengan donasi</span>
+                </p>
+                <p style={{ fontFamily:"'DM Sans',sans-serif", fontSize:12.5, color:'rgba(255,255,255,.45)', lineHeight:1.7, marginBottom:18, position:'relative' }}>
+                  Rp 5.000 = 1 pohon ditanam di lahan yang terdeforestasi.
+                </p>
+                <Link to="/donate" className="donate-btn" style={{ width:'100%', justifyContent:'center', position:'relative' }}>
+                  🌱 Donasi Sekarang
+                  <span className="ac"><ArrowRight size={12} color={C.lime}/></span>
+                </Link>
+              </div>
+
+              {/* Koordinat jika ada */}
+              {report.lat && report.lng && (
+                <div className="fu d4" style={{ background:'#fff', borderRadius:22, padding:'22px', border:`1px solid ${C.border}` }}>
+                  <p style={{ fontFamily:"'DM Sans',sans-serif", fontSize:10.5, color:C.textLt, fontWeight:700, letterSpacing:'1px', textTransform:'uppercase', marginBottom:12 }}>Koordinat</p>
+                  <div style={{ display:'flex', gap:8 }}>
+                    <div style={{ flex:1, background:C.offWhite, borderRadius:12, padding:'10px 14px', textAlign:'center' }}>
+                      <p style={{ fontFamily:"'DM Sans',sans-serif", fontSize:10, color:C.textLt, marginBottom:3 }}>Latitude</p>
+                      <p style={{ fontFamily:"'Syne',sans-serif", fontSize:14, fontWeight:700, color:C.textDk }}>{Number(report.lat).toFixed(4)}</p>
+                    </div>
+                    <div style={{ flex:1, background:C.offWhite, borderRadius:12, padding:'10px 14px', textAlign:'center' }}>
+                      <p style={{ fontFamily:"'DM Sans',sans-serif", fontSize:10, color:C.textLt, marginBottom:3 }}>Longitude</p>
+                      <p style={{ fontFamily:"'Syne',sans-serif", fontSize:14, fontWeight:700, color:C.textDk }}>{Number(report.lng).toFixed(4)}</p>
+                    </div>
+                  </div>
+                </div>
+              )}
+            </div>
+
+          </div>
         </div>
       </div>
     </>
