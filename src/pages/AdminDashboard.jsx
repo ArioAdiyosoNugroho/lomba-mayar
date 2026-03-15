@@ -58,7 +58,7 @@ const CSS = `
   .filter-btn.active{background:${C.green};color:#fff;border-color:${C.green}}
   .filter-btn:hover:not(.active){border-color:rgba(0,0,0,.18);color:${C.textDk}}
 
-  .stat-card{background:#fff;border-radius:18px;border:1px solid ${C.border};padding:18px;transition:transform .2s,box-shadow .2s}
+  .stat-card{background:#fff;border-radius:18px;border:1px solid ${C.border};padding:18px;transition:transform .2s,box-shadow .2s;overflow:hidden;min-width:0}
   .stat-card:hover{transform:translateY(-2px);box-shadow:0 8px 24px rgba(0,0,0,.07)}
 
   .rep-card{background:#fff;border-radius:18px;border:1px solid ${C.border};padding:16px 18px;transition:box-shadow .18s,border-color .18s}
@@ -92,7 +92,8 @@ const CSS = `
     .page-wrap{padding:16px 12px 60px!important}
     .stats-grid{grid-template-columns:1fr 1fr!important;gap:9px!important}
     .status-grid{grid-template-columns:1fr 1fr!important;gap:9px!important}
-    .stat-card{padding:14px!important;border-radius:14px!important}
+    .stat-card{padding:12px!important;border-radius:14px!important}
+    .stat-card p:first-of-type{font-size:clamp(13px,3vw,20px)!important}
     .tab-row{width:100%!important;overflow-x:auto!important}
     .tab-btn{font-size:12.5px!important;padding:8px 13px!important}
     .filter-row{overflow-x:auto!important;flex-wrap:nowrap!important}
@@ -118,11 +119,11 @@ function StatusBadge({ cfg }) {
 function StatCard({ Icon, val, label, color, delay }) {
   return (
     <div className={`stat-card fu ${delay}`}>
-      <div style={{ width:36, height:36, borderRadius:10, background:color+'18', display:'flex', alignItems:'center', justifyContent:'center', marginBottom:12 }}>
-        <Icon size={16} color={color}/>
+      <div style={{ width:32, height:32, borderRadius:9, background:color+'18', display:'flex', alignItems:'center', justifyContent:'center', marginBottom:10 }}>
+        <Icon size={15} color={color}/>
       </div>
-      <p style={{ fontFamily:"'Syne',sans-serif", fontSize:24, fontWeight:800, color:C.textDk, lineHeight:1, marginBottom:4 }}>{val ?? '—'}</p>
-      <p style={{ fontFamily:"'DM Sans',sans-serif", fontSize:11.5, color:C.textLt }}>{label}</p>
+      <p style={{ fontFamily:"'Syne',sans-serif", fontSize:'clamp(14px,3.5vw,22px)', fontWeight:800, color:C.textDk, lineHeight:1.1, marginBottom:4, wordBreak:'break-word', overflow:'hidden' }}>{val ?? '—'}</p>
+      <p style={{ fontFamily:"'DM Sans',sans-serif", fontSize:11, color:C.textLt }}>{label}</p>
     </div>
   );
 }
@@ -243,8 +244,12 @@ export default function AdminDashboard() {
         <div style={{ maxWidth:1100, margin:'0 auto', position:'relative', zIndex:1 }}>
           <div style={{ height:80 }}/>
           <div className="fu d1 hero-pad" style={{ padding:'16px 60px 48px' }}>
+            <div style={{ display:'inline-flex', alignItems:'center', gap:7, background:'rgba(245,158,11,.15)', border:'1px solid rgba(245,158,11,.22)', borderRadius:99, padding:'5px 14px', marginBottom:16 }}>
+              <ShieldCheck size={12} color='#fbbf24'/>
+              <span style={{ fontFamily:"'DM Sans',sans-serif", fontSize:12, color:'#fbbf24', fontWeight:600 }}>Admin Panel</span>
+            </div>
             <h1 className="fu d1 hero-h1" style={{ fontFamily:"'Syne',sans-serif", fontWeight:800, fontSize:56, lineHeight:.96, letterSpacing:'-2.5px', color:'#fff', marginBottom:20 }}>
-              Dashboard<br/><span style={{ color:C.lime }}>Admin</span>
+              Dashboard<br/><span style={{ color:C.lime }}>Administrator</span>
             </h1>
             {dash && (
               <div className="hero-stats" style={{ display:'flex', gap:24, flexWrap:'wrap' }}>
