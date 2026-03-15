@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import api from '../services/api';
 import toast from 'react-hot-toast';
@@ -152,7 +152,7 @@ const CSS = `
     .hero-title   { font-size:40px !important; letter-spacing:-1.5px !important; }
     .hero-stats   { gap:18px !important; }
     .stat-val     { font-size:20px !important; }
-    .page-wrap    { padding:18px 14px 100px !important; }   /* bottom padding for sticky footer */
+    .page-wrap    { padding:18px 14px ${showExtra ? 220 : 100}px !important; }
     .s-card       { border-radius:18px !important; padding:18px 16px !important; }
     .type-grid    { grid-template-columns:repeat(3,1fr) !important; }
     .coord-row    { grid-template-columns:1fr !important; }
@@ -173,6 +173,7 @@ export default function ReportPage() {
   const [photo,      setPhoto]      = useState(null);
   const [errors,     setErrors]     = useState({});
   const [showExtra,  setShowExtra]  = useState(false); // mobile collapsible "Data Tambahan"
+  const extraRef = useRef(null);
 
   const [form, setForm] = useState({
     title:'', description:'', lat:'', lng:'',
@@ -524,12 +525,21 @@ export default function ReportPage() {
                 </div>
 
                 {/* ── 5. Data Tambahan (collapsible on mobile) ── */}
-                <div className="s-card fu d2">
+                <div className="s-card fu d2" ref={extraRef}>
                   <button type="button"
                     style={{ width:'100%', display:'flex', alignItems:'center',
                       justifyContent:'space-between', background:'none', border:'none',
                       cursor:'pointer', padding:0, '-webkit-tap-highlight-color':'transparent' }}
-                    onClick={() => setShowExtra(s => !s)}>
+                    onClick={() => {
+                      const next = !showExtra;
+                      setShowExtra(next);
+                      if (next) {
+                        // Tunggu animasi selesai lalu scroll ke section
+                        setTimeout(() => {
+                          extraRef.current?.scrollIntoView({ behavior:'smooth', block:'start' });
+                        }, 120);
+                      }
+                    }}>
                     <div className="s-head" style={{ marginBottom:0 }}>
                       <div className="s-icon" style={{ background:'rgba(239,68,68,.09)' }}>
                         <AlertTriangle size={16} color='#ef4444'/>
