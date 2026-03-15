@@ -152,7 +152,7 @@ const CSS = `
     .hero-title   { font-size:40px !important; letter-spacing:-1.5px !important; }
     .hero-stats   { gap:18px !important; }
     .stat-val     { font-size:20px !important; }
-    .page-wrap    { padding:18px 14px ${showExtra ? 220 : 100}px !important; }
+    .page-wrap    { padding:18px 14px 100px !important; }
     .s-card       { border-radius:18px !important; padding:18px 16px !important; }
     .type-grid    { grid-template-columns:repeat(3,1fr) !important; }
     .coord-row    { grid-template-columns:1fr !important; }
@@ -282,7 +282,7 @@ export default function ReportPage() {
 
       {/* ── FORM ── */}
       <div style={{ background:C.offWhite }}>
-        <div className="page-wrap" style={{ maxWidth:1100, margin:'0 auto', padding:'28px 60px 80px' }}>
+        <div className="page-wrap" style={{ maxWidth:1100, margin:'0 auto', padding:`28px 60px 80px`, paddingBottom: showExtra ? 220 : undefined }}>
           <form onSubmit={submit}>
 
             {/* Mobile progress bar */}
