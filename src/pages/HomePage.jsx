@@ -6,7 +6,6 @@ import {
   ArrowRight, ArrowUpRight, Flame, Hammer, Tractor, Axe
 } from 'lucide-react';
 
-/* ── Fonts ─────────────────────────────────────────────────────── */
 if (!document.getElementById('hp-fonts')) {
   const l = document.createElement('link');
   l.id   = 'hp-fonts';
@@ -15,7 +14,6 @@ if (!document.getElementById('hp-fonts')) {
   document.head.appendChild(l);
 }
 
-/* ── Tokens ─────────────────────────────────────────────────────── */
 const C = {
   green   : '#1b3a2b',
   greenMd : '#2d6a4f',
@@ -27,35 +25,31 @@ const C = {
   textLt  : '#8a9984',
 };
 
-/* ── Image URLs (real photos via Unsplash) ─────────────────────── */
 const IMG = {
   hero : 'https://images.unsplash.com/photo-1448375240586-882707db888b?w=1400&auto=format&fit=crop&q=80',
   wwa  : 'https://images.unsplash.com/photo-1542601906990-b4d3fb778b09?w=700&auto=format&fit=crop&q=80',
 };
 
-/* ── Severity / Type ────────────────────────────────────────────── */
 const SEV = {
-  low:      { dot:'#60a5fa', label:'Rendah'  },
-  medium:   { dot:'#fbbf24', label:'Sedang'  },
-  high:     { dot:'#f97316', label:'Tinggi'  },
+  low:      { dot:'#60a5fa', label:'Rendah' },
+  medium:   { dot:'#fbbf24', label:'Sedang' },
+  high:     { dot:'#f97316', label:'Tinggi' },
   critical: { dot:'#ef4444', label:'Kritis'  },
 };
 const TYPE = {
-  sawit_expansion : { icon:TreePine, label:'Sawit'          },
+  sawit_expansion : { icon:TreePine, label:'Sawit'           },
   illegal_logging : { icon:Axe,      label:'Penebangan Liar' },
-  forest_fire     : { icon:Flame,    label:'Kebakaran'       },
+  forest_fire     : { icon:Flame,    label:'Kebakaran'        },
   land_clearing   : { icon:Tractor,  label:'Buka Lahan'      },
-  mining          : { icon:Hammer,   label:'Tambang'         },
-  other           : { icon:MapPin,   label:'Lainnya'         },
+  mining          : { icon:Hammer,   label:'Tambang'          },
+  other           : { icon:MapPin,   label:'Lainnya'          },
 };
 
-/* ── Global CSS ─────────────────────────────────────────────────── */
 const CSS = `
   *, *::before, *::after { box-sizing:border-box; margin:0; padding:0; }
-  html { scroll-behavior:smooth; }
-  body { background:${C.offWhite}; font-family:'DM Sans',sans-serif; }
+  html { scroll-behavior:smooth; overflow-x:hidden; max-width:100vw; }
+  body { background:${C.offWhite}; font-family:'DM Sans',sans-serif; overflow-x:hidden; max-width:100vw; }
 
-  /* Animations */
   @keyframes fadeUp {
     from { opacity:0; transform:translateY(24px); }
     to   { opacity:1; transform:translateY(0); }
@@ -69,14 +63,13 @@ const CSS = `
     60%     { box-shadow:0 0 0 7px rgba(181,226,53,0); }
   }
 
-  .fu  { animation:fadeUp .75s cubic-bezier(.16,1,.3,1) both; }
-  .d0  { animation-delay:.04s; }
-  .d1  { animation-delay:.15s; }
-  .d2  { animation-delay:.28s; }
-  .d3  { animation-delay:.42s; }
-  .d4  { animation-delay:.58s; }
+  .fu { animation:fadeUp .75s cubic-bezier(.16,1,.3,1) both; }
+  .d0 { animation-delay:.04s; }
+  .d1 { animation-delay:.15s; }
+  .d2 { animation-delay:.28s; }
+  .d3 { animation-delay:.42s; }
+  .d4 { animation-delay:.58s; }
 
-  /* --- Buttons --- */
   .btn-lime {
     display:inline-flex; align-items:center; gap:10px;
     background:${C.lime}; color:${C.textDk};
@@ -120,22 +113,10 @@ const CSS = `
     display:flex; align-items:center; justify-content:center;
   }
 
-  .btn-ghost-outline {
-    display:inline-flex; align-items:center; gap:6px;
-    background:transparent; color:rgba(255,255,255,.72);
-    padding:11px 24px; border-radius:99px;
-    font-family:'DM Sans',sans-serif; font-weight:500; font-size:14px;
-    text-decoration:none; border:1.5px solid rgba(255,255,255,.2); cursor:pointer;
-    transition:background .2s, border-color .2s, transform .2s;
-  }
-  .btn-ghost-outline:hover { background:rgba(255,255,255,.08); border-color:rgba(255,255,255,.4); transform:translateY(-2px); }
-
-  /* Ticker */
   .ticker-wrap  { overflow:hidden; width:100%; }
   .ticker-track { display:flex; width:max-content; animation:ticker 34s linear infinite; }
   .ticker-track:hover { animation-play-state:paused; }
 
-  /* Report card */
   .rcard {
     background:#fff; border-radius:20px; overflow:hidden;
     border:1px solid rgba(0,0,0,.07); display:flex; flex-direction:column;
@@ -145,13 +126,11 @@ const CSS = `
   .rcard:hover { transform:translateY(-5px); box-shadow:0 20px 50px -10px rgba(0,0,0,.13); }
   .rcard:hover .rcard-title { color:${C.greenMd}; }
 
-  /* WWA left card */
   .wwa-card {
     background:#fff; border-radius:24px; border:1px solid rgba(0,0,0,.08);
     padding:32px; display:flex; flex-direction:column; gap:24px;
   }
 
-  /* Pill tag */
   .pill-tag {
     display:inline-flex; align-items:center; gap:7px;
     border:1px solid rgba(0,0,0,.14); border-radius:99px;
@@ -159,26 +138,56 @@ const CSS = `
     font-family:'DM Sans',sans-serif; font-size:12.5px; color:${C.textMd};
   }
 
-  /* Responsive */
+  /* ── RESPONSIVE ─────────────────────────────────────────── */
   @media (max-width:1024px) {
-    .hero-cols  { flex-direction:column !important; align-items:flex-start !important; gap:24px !important; }
-    .hero-title { font-size:58px !important; }
+    .hero-cols  { flex-direction:column !important; align-items:flex-start !important; gap:20px !important; }
+    .hero-title { font-size:56px !important; }
     .wwa-grid   { grid-template-columns:1fr !important; }
     .rep-grid   { grid-template-columns:repeat(2,1fr) !important; }
     .cta-row    { flex-direction:column !important; align-items:flex-start !important; }
+    .hero-right-col { display:none !important; }
+    .hero-mobile-extra { display:flex !important; }
   }
+
   @media (max-width:640px) {
-    .hero-title { font-size:40px !important; }
-    .hero-img-h { height:280px !important; }
+    /* Hero title — lebih kecil agar tidak overflow */
+    .hero-title {
+      font-size:38px !important;
+      letter-spacing:-1px !important;
+      line-height:1.05 !important;
+      word-break:break-word !important;
+    }
+    .hero-img-h { height:260px !important; }
     .rep-grid   { grid-template-columns:1fr !important; }
-    .sp         { padding-left:20px !important; padding-right:20px !important; }
+    .sp         { padding-left:16px !important; padding-right:16px !important; }
     .stats-row  { grid-template-columns:1fr 1fr !important; }
+
+    /* Hero padding mobile */
+    .hero-pad   { padding:16px 16px 0 !important; }
+    .hero-img-wrap { margin:18px 12px 0 !important; }
+
+    /* WWA section padding */
+    .wwa-section { padding:52px 16px !important; }
+    .wwa-card    { padding:20px !important; }
+
+    /* Recent reports section */
+    .rep-section { padding:52px 16px !important; }
+
+    /* CTA section */
+    .cta-section { padding:40px 16px 64px !important; }
+    .cta-inner   { padding:36px 24px !important; }
+    .cta-title   { font-size:32px !important; }
+
+    /* Ticker */
+    .ticker-section { padding:14px 0 !important; }
+  }
+
+  @media (min-width:641px) {
+    .hero-mobile-extra { display:none !important; }
   }
 `;
 
-/* ══════════════════ INNER COMPONENTS ══════════════════════════════ */
-
-/* -- Floating stats card on hero image -- */
+/* ── HeroStatsCard ───────────────────────────────────────────────── */
 function HeroStatsCard({ stats }) {
   const total = stats?.total_reports ?? null;
   const crit  = stats?.critical_reports ?? null;
@@ -186,28 +195,28 @@ function HeroStatsCard({ stats }) {
 
   return (
     <div style={{
-      position:'absolute', bottom:24, left:24,
+      position:'absolute', bottom:16, left:16,
       background:'rgba(5,14,8,.72)',
       backdropFilter:'blur(20px)', WebkitBackdropFilter:'blur(20px)',
       border:'1px solid rgba(255,255,255,.12)',
-      borderRadius:18, padding:'20px 24px', minWidth:270,
+      borderRadius:16, padding:'16px 20px',
+      minWidth:220, maxWidth:'calc(100% - 32px)',
     }}>
       <p style={{
-        fontFamily:"'DM Sans',sans-serif", fontSize:11,
+        fontFamily:"'DM Sans',sans-serif", fontSize:10,
         color:'rgba(255,255,255,.45)', letterSpacing:'.7px',
-        textTransform:'uppercase', marginBottom:6,
+        textTransform:'uppercase', marginBottom:5,
       }}>Total laporan masuk</p>
       <p style={{
-        fontFamily:"'Syne',sans-serif", fontSize:38,
-        fontWeight:700, color:'#fff', lineHeight:1, marginBottom:14,
+        fontFamily:"'Syne',sans-serif", fontSize:32,
+        fontWeight:700, color:'#fff', lineHeight:1, marginBottom:12,
       }}>
         {total?.toLocaleString('id') ?? '—'}
       </p>
-      {/* progress bar */}
-      <div style={{ display:'flex', alignItems:'center', gap:10, marginBottom:8 }}>
-        <div style={{ flex:1, height:5, borderRadius:99, background:'rgba(255,255,255,.14)', overflow:'hidden' }}>
+      <div style={{ display:'flex', alignItems:'center', gap:10, marginBottom:6 }}>
+        <div style={{ flex:1, height:4, borderRadius:99, background:'rgba(255,255,255,.14)', overflow:'hidden' }}>
           <div style={{
-            height:5, borderRadius:99,
+            height:4, borderRadius:99,
             background:`linear-gradient(to right, ${C.lime}, #52c97a)`,
             width:`${pct}%`, transition:'width 1.4s ease',
           }}/>
@@ -216,22 +225,14 @@ function HeroStatsCard({ stats }) {
           {pct}%
         </span>
       </div>
-      <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center' }}>
-        <span style={{ fontFamily:"'DM Sans',sans-serif", fontSize:11, color:'rgba(255,255,255,.38)' }}>
-          {crit ?? '—'} kasus kritis
-        </span>
-      </div>
-      <p style={{
-        fontFamily:"'DM Sans',sans-serif", fontSize:11,
-        color:'rgba(255,255,255,.28)', marginTop:10, lineHeight:1.45,
-      }}>
-        Pantau seluruh laporan deforestasi Indonesia
-      </p>
+      <span style={{ fontFamily:"'DM Sans',sans-serif", fontSize:11, color:'rgba(255,255,255,.38)' }}>
+        {crit ?? '—'} kasus kritis
+      </span>
     </div>
   );
 }
 
-/* -- Ticker -- */
+/* ── TickerBar ───────────────────────────────────────────────────── */
 function TickerBar({ reports }) {
   const items = reports.length
     ? reports.map(r => r.title)
@@ -243,24 +244,22 @@ function TickerBar({ reports }) {
         'Pertambangan Liar · Sulawesi',
         'Deforestasi · Kalimantan Timur',
       ];
-
   const doubled = [...items, ...items];
 
   return (
-    <div style={{
+    <div className="ticker-section" style={{
       background:'#fff',
       borderTop:'1px solid rgba(0,0,0,.07)',
       borderBottom:'1px solid rgba(0,0,0,.07)',
-      padding:'17px 0',
-      overflow:'hidden',
+      padding:'15px 0', overflow:'hidden',
     }}>
       <div className="ticker-track">
         {doubled.map((t, i) => (
           <span key={i} style={{
-            fontFamily:"'DM Sans',sans-serif", fontSize:13.5,
+            fontFamily:"'DM Sans',sans-serif", fontSize:13,
             fontWeight:400, color:'#999',
-            padding:'0 48px', whiteSpace:'nowrap',
-            display:'inline-flex', alignItems:'center', gap:14,
+            padding:'0 40px', whiteSpace:'nowrap',
+            display:'inline-flex', alignItems:'center', gap:12,
           }}>
             <span style={{
               width:5, height:5, borderRadius:'50%',
@@ -274,53 +273,33 @@ function TickerBar({ reports }) {
   );
 }
 
-/* -- Who We Are -- */
+/* ── WhoWeAre ────────────────────────────────────────────────────── */
 function WhoWeAre({ stats, donation }) {
   const tags = ['Transparan', 'Aksi Nyata', 'Berbasis Data', 'Komunitas'];
 
   return (
-    <section style={{ background:'#fff', padding:'88px 60px' }} className="sp">
+    <section className="wwa-section sp" style={{ background:'#fff', padding:'88px 60px' }}>
       <div className="wwa-grid" style={{
         maxWidth:1200, margin:'0 auto',
         display:'grid', gridTemplateColumns:'1fr 1fr',
         gap:56, alignItems:'start',
       }}>
-
-        {/* LEFT card – white rounded */}
         <div className="wwa-card">
-          {/* Pill */}
           <span className="pill-tag">
             <span style={{ width:6, height:6, borderRadius:'50%', background:C.lime, display:'inline-block' }}/>
             Tentang Platform
           </span>
-
           <h2 style={{
-            fontFamily:"'Syne',sans-serif", fontWeight:700, fontSize:38,
+            fontFamily:"'Syne',sans-serif", fontWeight:700, fontSize:36,
             lineHeight:1.1, letterSpacing:'-.5px', color:C.textDk,
           }}>
             Digerakkan Data,<br/>Dipandu Komunitas
           </h2>
-
-          {/* Photo with tag pills overlay */}
-          <div style={{
-            borderRadius:18, overflow:'hidden', height:260,
-            position:'relative', flexShrink:0, background:'#c8d5c8',
-          }}>
-            <img
-              src={IMG.wwa}
-              alt="Komunitas hutan"
-              style={{ width:'100%', height:'100%', objectFit:'cover', display:'block' }}
-            />
-            {/* gradient overlay */}
-            <div style={{
-              position:'absolute', inset:0,
-              background:'linear-gradient(to top, rgba(10,26,14,.75) 0%, transparent 55%)',
-            }}/>
-            {/* Tag pills */}
-            <div style={{
-              position:'absolute', bottom:14, left:14,
-              display:'flex', flexWrap:'wrap', gap:7,
-            }}>
+          <div style={{ borderRadius:18, overflow:'hidden', height:240, position:'relative', background:'#c8d5c8' }}>
+            <img src={IMG.wwa} alt="Komunitas hutan"
+              style={{ width:'100%', height:'100%', objectFit:'cover', display:'block' }}/>
+            <div style={{ position:'absolute', inset:0, background:'linear-gradient(to top, rgba(10,26,14,.75) 0%, transparent 55%)' }}/>
+            <div style={{ position:'absolute', bottom:14, left:14, display:'flex', flexWrap:'wrap', gap:7 }}>
               {tags.map(t => (
                 <span key={t} style={{
                   background:'rgba(181,226,53,.93)', color:C.textDk,
@@ -332,74 +311,48 @@ function WhoWeAre({ stats, donation }) {
           </div>
         </div>
 
-        {/* RIGHT – text */}
         <div style={{ display:'flex', flexDirection:'column', gap:22, paddingTop:10 }}>
-          <p style={{
-            fontFamily:"'Syne',sans-serif", fontWeight:700,
-            fontSize:22, lineHeight:1.5, color:C.textDk,
-          }}>
-            Dengan komunitas sebagai inti, kami menghadirkan
-            transparansi penuh dalam pemantauan dan pemulihan
-            hutan Indonesia.
+          <p style={{ fontFamily:"'Syne',sans-serif", fontWeight:700, fontSize:20, lineHeight:1.5, color:C.textDk }}>
+            Dengan komunitas sebagai inti, kami menghadirkan transparansi penuh
+            dalam pemantauan dan pemulihan hutan Indonesia.
           </p>
-
-          <p style={{
-            fontFamily:"'DM Sans',sans-serif", fontSize:14.5,
-            lineHeight:1.85, color:C.textMd, fontWeight:400,
-          }}>
-            HutanKita adalah jaringan intelijen publik yang menghubungkan
-            masyarakat, aktivis, dan pengambil kebijakan untuk aksi nyata.
-            Setiap laporan diverifikasi, dipetakan, dan ditindaklanjuti —
-            karena hutan Indonesia adalah warisan kita bersama.
+          <p style={{ fontFamily:"'DM Sans',sans-serif", fontSize:14.5, lineHeight:1.85, color:C.textMd }}>
+            HutanKita adalah jaringan intelijen publik yang menghubungkan masyarakat,
+            aktivis, dan pengambil kebijakan untuk aksi nyata. Setiap laporan
+            diverifikasi, dipetakan, dan ditindaklanjuti — karena hutan Indonesia
+            adalah warisan kita bersama.
           </p>
-
-          {/* Mini stats */}
           <div className="stats-row" style={{ display:'grid', gridTemplateColumns:'repeat(2,1fr)', gap:14, paddingTop:4 }}>
             {[
-              { icon:AlertTriangle, val:stats?.total_reports,                                label:'Total Laporan', col:'#f97316' },
-              { icon:TreePine,      val:donation?.total_trees_planted?.toLocaleString('id'),  label:'Pohon Ditanam', col:C.greenMd },
-              { icon:Users,         val:donation?.total_donors,                               label:'Relawan Aktif', col:'#0ea5e9' },
-              { icon:Heart,         val:stats?.critical_reports,                              label:'Kasus Kritis',  col:'#ef4444' },
+              { icon:AlertTriangle, val:stats?.total_reports,                               label:'Total Laporan', col:'#f97316' },
+              { icon:TreePine,      val:donation?.total_trees_planted?.toLocaleString('id'), label:'Pohon Ditanam', col:C.greenMd },
+              { icon:Users,         val:donation?.total_donors,                              label:'Relawan Aktif', col:'#0ea5e9' },
+              { icon:Heart,         val:stats?.critical_reports,                             label:'Kasus Kritis',  col:'#ef4444' },
             ].map(({ icon:Icon, val, label, col }, i) => (
               <div key={i} style={{
-                display:'flex', alignItems:'center', gap:12,
-                padding:'13px 16px', borderRadius:14,
-                background:C.offWhite, border:'1px solid rgba(0,0,0,.07)',
+                display:'flex', alignItems:'center', gap:12, padding:'13px 16px',
+                borderRadius:14, background:C.offWhite, border:'1px solid rgba(0,0,0,.07)',
               }}>
-                <div style={{
-                  width:38, height:38, borderRadius:10,
-                  background:col+'1a', display:'flex', alignItems:'center', justifyContent:'center', flexShrink:0,
-                }}>
+                <div style={{ width:38, height:38, borderRadius:10, background:col+'1a', display:'flex', alignItems:'center', justifyContent:'center', flexShrink:0 }}>
                   <Icon size={17} color={col}/>
                 </div>
                 <div>
-                  <div style={{ fontFamily:"'Syne',sans-serif", fontSize:22, fontWeight:700, color:C.textDk, lineHeight:1 }}>
-                    {val ?? '—'}
-                  </div>
-                  <div style={{ fontFamily:"'DM Sans',sans-serif", fontSize:11, color:C.textLt, marginTop:2 }}>
-                    {label}
-                  </div>
+                  <div style={{ fontFamily:"'Syne',sans-serif", fontSize:22, fontWeight:700, color:C.textDk, lineHeight:1 }}>{val ?? '—'}</div>
+                  <div style={{ fontFamily:"'DM Sans',sans-serif", fontSize:11, color:C.textLt, marginTop:2 }}>{label}</div>
                 </div>
               </div>
             ))}
           </div>
-
-          {/* Buttons */}
           <div style={{ display:'flex', alignItems:'center', gap:20, paddingTop:6 }}>
             <Link to="/about" className="btn-dark">
-              Pelajari Lebih
-              <span className="ac"><ArrowRight size={15}/></span>
+              Pelajari Lebih <span className="ac"><ArrowRight size={15}/></span>
             </Link>
             <Link to="/map" style={{
               fontFamily:"'DM Sans',sans-serif", fontSize:14, color:C.textMd,
               textDecoration:'none', fontWeight:500,
               display:'flex', alignItems:'center', gap:5,
               borderBottom:`1.5px solid ${C.textLt}`, paddingBottom:2,
-              transition:'color .2s',
-            }}
-            onMouseEnter={e => e.currentTarget.style.color = C.textDk}
-            onMouseLeave={e => e.currentTarget.style.color = C.textMd}
-            >
+            }}>
               Tim Kami <ArrowUpRight size={14}/>
             </Link>
           </div>
@@ -409,7 +362,7 @@ function WhoWeAre({ stats, donation }) {
   );
 }
 
-/* -- Report Card -- */
+/* ── ReportCard ──────────────────────────────────────────────────── */
 function ReportCard({ r }) {
   const TI = TYPE[r.report_type]?.icon ?? MapPin;
   const tl = TYPE[r.report_type]?.label ?? r.report_type;
@@ -417,21 +370,18 @@ function ReportCard({ r }) {
 
   return (
     <Link to={`/reports/${r.id}`} className="rcard">
-      {/* Image */}
       <div style={{ position:'relative', height:200, background:'#dde4d8', flexShrink:0, overflow:'hidden' }}>
         {r.photo_url
           ? <img src={r.photo_url} alt={r.title}
               style={{ width:'100%', height:'100%', objectFit:'cover', display:'block', transition:'transform .6s ease' }}
-              onMouseEnter={e => e.target.style.transform = 'scale(1.05)'}
-              onMouseLeave={e => e.target.style.transform = 'scale(1)'}
+              onMouseEnter={e => e.target.style.transform='scale(1.05)'}
+              onMouseLeave={e => e.target.style.transform='scale(1)'}
             />
           : <div style={{ width:'100%', height:'100%', display:'flex', alignItems:'center', justifyContent:'center' }}>
               <TreePine size={44} color="rgba(0,0,0,.12)"/>
             </div>
         }
         <div style={{ position:'absolute', inset:0, background:'linear-gradient(to top,rgba(0,0,0,.52) 0%,transparent 52%)' }}/>
-
-        {/* Severity badge */}
         <div style={{
           position:'absolute', top:12, right:12,
           background:'rgba(255,255,255,.92)', backdropFilter:'blur(8px)',
@@ -442,8 +392,6 @@ function ReportCard({ r }) {
           <span style={{ width:7, height:7, borderRadius:'50%', background:sv.dot }}/>
           {sv.label}
         </div>
-
-        {/* Type badge */}
         <div style={{
           position:'absolute', bottom:12, left:12,
           background:'rgba(0,0,0,.58)', backdropFilter:'blur(8px)',
@@ -454,33 +402,26 @@ function ReportCard({ r }) {
           <TI size={12}/> {tl}
         </div>
       </div>
-
-      {/* Content */}
       <div style={{ padding:'18px 20px 20px', display:'flex', flexDirection:'column', flex:1 }}>
         <h3 className="rcard-title" style={{
           fontFamily:"'DM Sans',sans-serif", fontWeight:600, fontSize:15,
           lineHeight:1.48, color:C.textDk, transition:'color .2s',
           display:'-webkit-box', WebkitLineClamp:2, WebkitBoxOrient:'vertical', overflow:'hidden',
         }}>{r.title}</h3>
-
         <div style={{ marginTop:14, paddingTop:14, borderTop:'1px solid rgba(0,0,0,.07)' }}>
           {r.location_text && (
             <div style={{ display:'flex', alignItems:'center', gap:5, marginBottom:9 }}>
               <MapPin size={12} color={C.greenMd}/>
-              <span style={{
-                fontSize:12, color:'#aaa', fontFamily:"'DM Sans',sans-serif",
-                overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap',
-              }}>{r.location_text}</span>
+              <span style={{ fontSize:12, color:'#aaa', fontFamily:"'DM Sans',sans-serif", overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap' }}>
+                {r.location_text}
+              </span>
             </div>
           )}
           <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center' }}>
             <span style={{ fontSize:11, color:'#ccc', fontFamily:"'DM Sans',sans-serif" }}>
-              {new Date(r.created_at).toLocaleDateString('id-ID',{ day:'numeric', month:'short', year:'numeric' })}
+              {new Date(r.created_at).toLocaleDateString('id-ID', { day:'numeric', month:'short', year:'numeric' })}
             </span>
-            <span style={{
-              fontSize:12, color:C.greenMd, fontFamily:"'DM Sans',sans-serif",
-              fontWeight:500, display:'flex', alignItems:'center', gap:3,
-            }}>
+            <span style={{ fontSize:12, color:C.greenMd, fontFamily:"'DM Sans',sans-serif", fontWeight:500, display:'flex', alignItems:'center', gap:3 }}>
               Detail <ArrowRight size={12}/>
             </span>
           </div>
@@ -490,40 +431,25 @@ function ReportCard({ r }) {
   );
 }
 
-/* -- Recent Reports section -- */
+/* ── RecentReports ───────────────────────────────────────────────── */
 function RecentReports({ reports }) {
   return (
-    <section style={{ background:C.offWhite, padding:'80px 60px', borderTop:'1px solid rgba(0,0,0,.07)' }} className="sp">
+    <section className="rep-section sp" style={{ background:C.offWhite, padding:'80px 60px', borderTop:'1px solid rgba(0,0,0,.07)' }}>
       <div style={{ maxWidth:1200, margin:'0 auto' }}>
-        <div style={{ display:'flex', justifyContent:'space-between', alignItems:'flex-end', marginBottom:40 }}>
+        <div style={{ display:'flex', justifyContent:'space-between', alignItems:'flex-end', marginBottom:40, flexWrap:'wrap', gap:12 }}>
           <div>
-            <h2 style={{
-              fontFamily:"'Syne',sans-serif", fontWeight:700, fontSize:38,
-              color:C.textDk, letterSpacing:'-.5px', lineHeight:1.1,
-            }}>Laporan Terbaru</h2>
-            <p style={{ fontFamily:"'DM Sans',sans-serif", fontSize:14, color:C.textLt, marginTop:8 }}>
-              Pantauan langsung dari masyarakat di lapangan
-            </p>
+            <h2 style={{ fontFamily:"'Syne',sans-serif", fontWeight:700, fontSize:36, color:C.textDk, letterSpacing:'-.5px', lineHeight:1.1 }}>Laporan Terbaru</h2>
+            <p style={{ fontFamily:"'DM Sans',sans-serif", fontSize:14, color:C.textLt, marginTop:8 }}>Pantauan langsung dari masyarakat di lapangan</p>
           </div>
-          <Link to="/map" style={{
-            fontFamily:"'DM Sans',sans-serif", fontSize:13.5, color:C.greenMd,
-            textDecoration:'none', fontWeight:500,
-            display:'flex', alignItems:'center', gap:4,
-            borderBottom:`1.5px solid ${C.greenMd}`, paddingBottom:2,
-          }}>
+          <Link to="/map" style={{ fontFamily:"'DM Sans',sans-serif", fontSize:13.5, color:C.greenMd, textDecoration:'none', fontWeight:500, display:'flex', alignItems:'center', gap:4, borderBottom:`1.5px solid ${C.greenMd}`, paddingBottom:2 }}>
             Semua Laporan <ArrowUpRight size={14}/>
           </Link>
         </div>
-
         <div className="rep-grid" style={{ display:'grid', gridTemplateColumns:'repeat(3,1fr)', gap:22 }}>
           {reports.length > 0
             ? reports.map(r => <ReportCard key={r.id} r={r}/>)
             : Array.from({ length:3 }).map((_, i) => (
-                <div key={i} style={{
-                  background:'#fff', borderRadius:20, height:350,
-                  border:'1px solid rgba(0,0,0,.07)',
-                  display:'flex', alignItems:'center', justifyContent:'center',
-                }}>
+                <div key={i} style={{ background:'#fff', borderRadius:20, height:350, border:'1px solid rgba(0,0,0,.07)', display:'flex', alignItems:'center', justifyContent:'center' }}>
                   <TreePine size={36} color="rgba(0,0,0,.1)"/>
                 </div>
               ))
@@ -534,46 +460,27 @@ function RecentReports({ reports }) {
   );
 }
 
-/* -- CTA Section -- */
+/* ── CTASection ──────────────────────────────────────────────────── */
 function CTASection() {
   return (
-    <section style={{ background:'#fff', padding:'64px 60px 88px' }} className="sp">
+    <section className="cta-section sp" style={{ background:'#fff', padding:'64px 60px 88px' }}>
       <div style={{ maxWidth:1200, margin:'0 auto' }}>
-        <div style={{
-          background:C.green, borderRadius:28, padding:'60px 60px',
-          position:'relative', overflow:'hidden',
-        }}>
-          {/* Decorative circles */}
+        <div className="cta-inner" style={{ background:C.green, borderRadius:28, padding:'60px 60px', position:'relative', overflow:'hidden' }}>
           <div style={{ position:'absolute', right:-60, top:-60, width:300, height:300, borderRadius:'50%', background:'rgba(181,226,53,.07)', pointerEvents:'none' }}/>
           <div style={{ position:'absolute', right:50, bottom:-80, width:200, height:200, borderRadius:'50%', background:'rgba(181,226,53,.05)', pointerEvents:'none' }}/>
-
-          <div className="cta-row" style={{ display:'flex', alignItems:'center', justifyContent:'space-between', gap:40, position:'relative' }}>
+          <div className="cta-row" style={{ display:'flex', alignItems:'center', justifyContent:'space-between', gap:40, position:'relative', flexWrap:'wrap' }}>
             <div style={{ maxWidth:580 }}>
-              <span style={{
-                fontFamily:"'DM Sans',sans-serif", fontSize:11, color:C.lime,
-                fontWeight:600, letterSpacing:'2px', textTransform:'uppercase',
-                display:'block', marginBottom:16,
-              }}>Donasi Pohon</span>
-              <h2 style={{
-                fontFamily:"'Syne',sans-serif", fontWeight:700, fontSize:46,
-                color:'#fff', lineHeight:1.1, letterSpacing:'-.5px', marginBottom:18,
-              }}>
-                Rp 5.000 = 1 Pohon<br/>
-                <span style={{ color:C.lime }}>di Lahan Nyata</span>
+              <span style={{ fontFamily:"'DM Sans',sans-serif", fontSize:11, color:C.lime, fontWeight:600, letterSpacing:'2px', textTransform:'uppercase', display:'block', marginBottom:16 }}>Donasi Pohon</span>
+              <h2 className="cta-title" style={{ fontFamily:"'Syne',sans-serif", fontWeight:700, fontSize:44, color:'#fff', lineHeight:1.1, letterSpacing:'-.5px', marginBottom:18 }}>
+                Rp 5.000 = 1 Pohon<br/><span style={{ color:C.lime }}>di Lahan Nyata</span>
               </h2>
-              <p style={{
-                fontFamily:"'DM Sans',sans-serif", fontSize:15,
-                color:'rgba(255,255,255,.48)', lineHeight:1.8,
-              }}>
-                Setiap pohon dipantau melalui satelit. Donasi kamu dicatat secara
-                transparan untuk lahan-lahan terdeforestasi Indonesia.
+              <p style={{ fontFamily:"'DM Sans',sans-serif", fontSize:15, color:'rgba(255,255,255,.48)', lineHeight:1.8 }}>
+                Setiap pohon dipantau melalui satelit. Donasi kamu dicatat secara transparan untuk lahan-lahan terdeforestasi Indonesia.
               </p>
             </div>
             <Link to="/donate" className="btn-lime" style={{ flexShrink:0, fontSize:16, padding:'14px 14px 14px 30px' }}>
               Tanam Sekarang
-              <span className="ac" style={{ width:40, height:40 }}>
-                <ArrowRight size={17} color={C.lime}/>
-              </span>
+              <span className="ac" style={{ width:40, height:40 }}><ArrowRight size={17} color={C.lime}/></span>
             </Link>
           </div>
         </div>
@@ -582,7 +489,7 @@ function CTASection() {
   );
 }
 
-/* ══════════════════════════ PAGE ═══════════════════════════════════ */
+/* ══════════════════════════ PAGE ════════════════════════════════════ */
 export default function HomePage() {
   const [stats,    setStats]    = useState(null);
   const [donation, setDonation] = useState(null);
@@ -594,47 +501,46 @@ export default function HomePage() {
     api.get('/reports?per_page=6').then(r => setReports(r.data.data || [])).catch(() => {});
   }, []);
 
-  const total   = stats?.total_reports ?? null;
-  const crit    = stats?.critical_reports ?? null;
-  const pct     = (total && total > 0) ? Math.round((crit / total) * 100) : 72;
-
   return (
     <>
       <style>{CSS}</style>
 
-      {/* ═══════════════ DARK GREEN HEADER ZONE ═══════════════════ */}
-      <div style={{ background:C.green, position:'relative' }}>
+      {/* ═══════════ DARK GREEN HERO ZONE ═══════════════════════════ */}
+      <div style={{ background:C.green, position:'relative', overflow:'hidden' }}>
         <div style={{ maxWidth:1280, margin:'0 auto' }}>
-
-          {/* Navbar spacer (Navbar is absolute-positioned from Navbar.jsx) */}
           <div style={{ height:80 }}/>
 
           {/* ── HERO TEXT ROW ── */}
-          <div className="hero-cols d1 fu" style={{
+          <div className="hero-cols d1 fu hero-pad" style={{
             display:'flex', alignItems:'flex-end',
             justifyContent:'space-between', gap:32,
             padding:'16px 40px 0',
+            minWidth:0,
           }}>
-            {/* Big title */}
+
+            {/* Judul */}
             <h1 className="hero-title" style={{
               fontFamily:"'Syne',sans-serif", fontWeight:800,
               fontSize:80, lineHeight:.98, letterSpacing:'-3px',
-              color:'#fff', flex:'1 1 auto', maxWidth:660,
+              color:'#fff',
+              /* KUNCI FIX: tidak pakai maxWidth, biar flex handle sendiri */
+              flex:'1 1 auto', minWidth:0,
+              wordBreak:'keep-all', overflowWrap:'normal',
             }}>
               Lindungi Hutan,<br/>
               Selamatkan<br/>
               Masa Depan
             </h1>
 
-            {/* Right: description + button */}
-            <div className="d2 fu" style={{
-              flexShrink:0, maxWidth:275,
+            {/* Kanan: deskripsi + tombol — hanya tampil di desktop */}
+            <div className="hero-right-col d2 fu" style={{
+              flexShrink:0, width:260,
               display:'flex', flexDirection:'column',
               alignItems:'flex-start', gap:22, paddingBottom:8,
             }}>
               <p style={{
                 fontFamily:"'DM Sans',sans-serif", fontSize:14, lineHeight:1.75,
-                color:'rgba(255,255,255,.52)', fontWeight:400,
+                color:'rgba(255,255,255,.52)',
               }}>
                 Laporkan deforestasi, pantau titik rawan, dan ikut dalam
                 restorasi hutan Indonesia bersama masyarakat penjaga lingkungan.
@@ -646,42 +552,67 @@ export default function HomePage() {
             </div>
           </div>
 
+          {/* Deskripsi + tombol khusus mobile/tablet — di bawah judul */}
+          <div className="hero-mobile-extra" style={{
+            display:'none',
+            flexDirection:'column', gap:16,
+            padding:'20px 16px 0',
+          }}>
+            <p style={{
+              fontFamily:"'DM Sans',sans-serif", fontSize:15, lineHeight:1.75,
+              color:'rgba(255,255,255,.55)',
+            }}>
+              Laporkan deforestasi, pantau titik rawan, dan ikut dalam restorasi hutan Indonesia.
+            </p>
+            <Link to="/donate" className="btn-lime-sm" style={{ alignSelf:'flex-start' }}>
+              Donasi Pohon
+              <span className="ac"><ArrowRight size={13} color={C.lime}/></span>
+            </Link>
+          </div>
+
           {/* ── HERO IMAGE ── */}
-          <div className="d3 fu" style={{ margin:'30px 20px 0', position:'relative' }}>
+          <div className="d3 fu hero-img-wrap" style={{ margin:'28px 20px 0', position:'relative', minWidth:0 }}>
             <div className="hero-img-h" style={{
               height:420, borderRadius:'18px 18px 0 0',
-              overflow:'hidden', position:'relative',
-              background:'#1b3a2b',
+              overflow:'hidden', position:'relative', background:'#1b3a2b',
             }}>
-              {/* Real photo */}
               <img
                 src={IMG.hero}
                 alt="Hutan tropis Indonesia"
-                style={{
-                  width:'100%', height:'100%',
-                  objectFit:'cover', display:'block',
-                  objectPosition:'center center',
-                }}
+                style={{ width:'100%', height:'100%', objectFit:'cover', display:'block', objectPosition:'center center' }}
               />
-
-              {/* Gradient overlay */}
               <div style={{
                 position:'absolute', inset:0,
                 background:'linear-gradient(to top, rgba(5,16,9,.72) 0%, rgba(5,16,9,.15) 45%, transparent 70%)',
               }}/>
-
-              {/* Floating card */}
               <HeroStatsCard stats={stats}/>
+
+              {/* Live badge */}
+              <div style={{
+                position:'absolute', top:16, right:16,
+                background:'rgba(5,14,8,.68)', backdropFilter:'blur(12px)',
+                border:'1px solid rgba(181,226,53,.3)',
+                borderRadius:99, padding:'7px 14px',
+                display:'flex', alignItems:'center', gap:7,
+              }}>
+                <span style={{
+                  width:6, height:6, borderRadius:'50%', background:C.lime,
+                  display:'inline-block', animation:'pulse-lime 2s infinite',
+                }}/>
+                <span style={{ fontFamily:"'DM Sans',sans-serif", fontSize:12, color:C.lime, fontWeight:500 }}>
+                  Live Monitoring
+                </span>
+              </div>
             </div>
           </div>
 
         </div>
       </div>
 
-      {/* ═══════════════ TICKER ══════════════════════════════════ */}
+      {/* ═══════════ TICKER ══════════════════════════════════════════ */}
       <TickerBar reports={reports}/>
 
-      {/* ═══════════════ LIGHT SECTIONS ═════════════════════════ */}
+      {/* ═══════════ LIGHT SECTIONS ══════════════════════════════════ */}
       <WhoWeAre stats={stats} donation={donation}/>
       <RecentReports reports={reports}/>
       <CTASection/>
