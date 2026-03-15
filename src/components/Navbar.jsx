@@ -1,6 +1,6 @@
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { TreePine, LogOut, User, ShieldCheck, Menu, X } from 'lucide-react';
+import { TreePine, LogOut, User, ShieldCheck, Menu, X, ArrowRight } from 'lucide-react';
 import { useState } from 'react';
 import toast from 'react-hot-toast';
 
@@ -189,7 +189,7 @@ export default function Navbar() {
                 <Link to="/login" className="nb-link">Masuk</Link>
                 <Link to="/register" className="nb-btn-ol">
                   Mulai Gratis
-                  <span className="ac">→</span>
+                  <span className="ac"><ArrowRight size={14} color={C.black}/></span>
                 </Link>
               </>
             )}
