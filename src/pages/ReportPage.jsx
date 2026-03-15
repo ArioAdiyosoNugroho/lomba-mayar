@@ -256,15 +256,6 @@ export default function ReportPage() {
           <div style={{ height:80 }}/>
           <div className="fu d1 hero-wrap" style={{ padding:'16px 60px 48px' }}>
 
-            {/* Badge */}
-            <div style={{ display:'inline-flex', alignItems:'center', gap:7,
-              background:'rgba(239,68,68,.15)', border:'1px solid rgba(239,68,68,.22)',
-              borderRadius:99, padding:'5px 14px', marginBottom:16 }}>
-              <AlertTriangle size={12} color='#f87171'/>
-              <span style={{ fontFamily:"'DM Sans',sans-serif", fontSize:12,
-                color:'#f87171', fontWeight:600 }}>Laporan Kerusakan Hutan</span>
-            </div>
-
             <h1 className="fu d1 hero-title" style={{ fontFamily:"'Syne',sans-serif",
               fontWeight:800, fontSize:58, lineHeight:.96,
               letterSpacing:'-2.5px', color:'#fff', marginBottom:22 }}>
