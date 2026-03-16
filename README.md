@@ -19,7 +19,7 @@ If you are developing a production application, we recommend using TypeScript wi
 untuk akses user role gunakan pada aplikasi ini adalah:
 
 role = user:
-- lakukan registrasi pada aplikasi yang
+- lakukan registrasi pada aplikasi
 
 role = admin:
 - masukkan email:admin@forestguardian.id
