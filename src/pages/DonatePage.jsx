@@ -190,25 +190,22 @@ export default function DonatePage() {
             <button key={p.amount}
               className={`pkg-card${isActive ? ' active' : ''}`}
               onClick={() => { setSelected(p); setUseCustom(false); }}>
-              <span className="pkg-emoji" style={{ fontSize:22, flexShrink:0 }}>{p.emoji}</span>
-              <div style={{ flex:1, minWidth:0 }}>
-                <div style={{ display:'flex', alignItems:'center', gap:7 }}>
+              <span style={{
+                fontFamily:"'Syne',sans-serif", fontWeight:700, fontSize:15,alignItems:'right',
+                color: isActive ? '#fff' : C.textDk, display:'block',
+              }}>{p.label}</span>
+              <div style={{ display:'flex', alignItems:'center', gap:6, marginTop:3, flexWrap:'wrap' }}>
+                {p.popular && (
                   <span style={{
-                    fontFamily:"'Syne',sans-serif", fontWeight:700, fontSize:15,
-                    color: isActive ? '#fff' : C.textDk,
-                  }}>{p.label}</span>
-                  {p.popular && (
-                    <span style={{
-                      background: isActive ? 'rgba(181,226,53,.25)' : C.lime,
-                      color: isActive ? C.lime : C.textDk,
-                      fontSize:9.5, fontWeight:700, padding:'2px 8px', borderRadius:99,
-                      letterSpacing:'.3px',
-                    }}>POPULER</span>
-                  )}
-                </div>
+                    background: isActive ? 'rgba(181,226,53,.25)' : C.lime,
+                    color: isActive ? C.lime : C.textDk,
+                    fontSize:9.5, fontWeight:700, padding:'2px 8px', borderRadius:99,
+                    letterSpacing:'.3px', flexShrink:0,
+                  }}>POPULER</span>
+                )}
                 <p style={{
                   fontFamily:"'DM Sans',sans-serif", fontSize:12,
-                  color: isActive ? 'rgba(255,255,255,.5)' : C.textLt, marginTop:2,
+                  color: isActive ? 'rgba(255,255,255,.5)' : C.textLt,
                 }}>{p.desc}</p>
               </div>
               <div style={{ textAlign:'right', flexShrink:0 }}>
