@@ -382,23 +382,6 @@ export default function LeaderboardPage() {
                     ))}
                   </div>
                 </div>
-
-                {/* ── Mobile: rest rows after podium ── */}
-                <div className="mob-rows" style={{ display:'none', flexDirection:'column', gap:6 }}>
-                  <style>{`@media(max-width:640px){.mob-rows{display:flex!important}}`}</style>
-                  {rest.length > 0 && (
-                    <div style={{ display:'flex', alignItems:'center', gap:10, margin:'4px 0 8px' }}>
-                      <div style={{ flex:1, height:1, background:C.border }}/>
-                      <span style={{ fontFamily:"'DM Sans',sans-serif", fontSize:11,
-                        color:C.textLt, letterSpacing:'.5px' }}>Peringkat berikutnya</span>
-                      <div style={{ flex:1, height:1, background:C.border }}/>
-                    </div>
-                  )}
-                  {rest.map(entry => (
-                    <LeaderRow key={entry.rank} entry={entry}/>
-                  ))}
-                </div>
-
               </div>
 
               {/* ── RIGHT: stats sidebar (desktop only) ── */}
