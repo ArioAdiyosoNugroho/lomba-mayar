@@ -6,7 +6,7 @@ import toast from 'react-hot-toast';
 import {
   MapPin, ThumbsUp, MessageCircle, Calendar, ArrowLeft,
   X, ZoomIn, ArrowRight, Flame, Axe, Tractor,
-  Hammer, TreePine, Send, Share2, ChevronDown,
+  Hammer, TreePine, Send, Share2, ChevronDown, Trash2,
 } from 'lucide-react';
 
 if (!document.getElementById('detail-fonts')) {
@@ -49,13 +49,13 @@ const CSS = `
   @keyframes fadeUp{from{opacity:0;transform:translateY(18px)}to{opacity:1;transform:translateY(0)}}
   @keyframes spin{to{transform:rotate(360deg)}}
   @keyframes pulse-lime{0%,100%{box-shadow:0 0 0 0 rgba(181,226,53,.55)}60%{box-shadow:0 0 0 7px rgba(181,226,53,0)}}
+  @keyframes fadeIn{from{opacity:0;transform:scale(.97)}to{opacity:1;transform:scale(1)}}
   .fu{animation:fadeUp .65s cubic-bezier(.16,1,.3,1) both}
   .d1{animation-delay:.06s}.d2{animation-delay:.14s}.d3{animation-delay:.22s}.d4{animation-delay:.3s}
 
   .back-link{display:inline-flex;align-items:center;gap:6px;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:500;color:rgba(255,255,255,.5);text-decoration:none;transition:color .18s}
   .back-link:hover{color:rgba(255,255,255,.9)}
 
-  /* Action pills — ala sosmed */
   .action-pill{display:inline-flex;align-items:center;gap:7px;background:#fff;border:1.5px solid ${C.border};color:${C.textMd};padding:9px 16px;border-radius:99px;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:500;cursor:pointer;transition:all .18s;text-decoration:none;-webkit-tap-highlight-color:transparent}
   .action-pill:hover{border-color:${C.greenMd};color:${C.greenMd}}
   .action-pill.voted{border-color:${C.greenMd};color:${C.greenMd};background:rgba(45,106,79,.06)}
@@ -72,7 +72,24 @@ const CSS = `
   .send-btn:hover{background:${C.greenMd};transform:scale(1.06)}
   .send-btn:disabled{opacity:.4;cursor:not-allowed}
 
-  /* Mobile sticky footer donasi */
+  /* Delete button on comment */
+  .del-btn{
+    display:inline-flex;align-items:center;justify-content:center;
+    width:28px;height:28px;border-radius:8px;border:none;
+    background:transparent;color:${C.textLt};cursor:pointer;
+    transition:background .15s,color .15s;flex-shrink:0;
+    -webkit-tap-highlight-color:transparent;
+  }
+  .del-btn:hover{background:#fef2f2;color:#ef4444}
+
+  /* Confirm delete inline */
+  .del-confirm{
+    display:flex;align-items:center;gap:8px;
+    background:#fef2f2;border:1px solid #fecaca;
+    border-radius:11px;padding:8px 12px;
+    animation:fadeIn .18s ease;
+  }
+
   .mob-donate-bar{
     position:fixed;bottom:0;left:0;right:0;z-index:100;
     display:none;
@@ -91,10 +108,8 @@ const CSS = `
   .mob-donate-btn:hover{background:${C.limeHov}}
   .mob-donate-btn .ic{width:38px;height:38px;border-radius:50%;background:${C.textDk};flex-shrink:0;display:flex;align-items:center;justify-content:center}
 
-  /* Two column layout */
   .detail-layout{display:grid;grid-template-columns:1fr 300px;gap:20px;align-items:start}
 
-  /* Responsive */
   @media(max-width:1024px){
     .detail-layout{grid-template-columns:1fr!important}
     .sidebar{display:none!important}
@@ -130,6 +145,105 @@ function PhotoModal({ src, alt, onClose }) {
   );
 }
 
+/* ── Comment item — outside parent to avoid focus/remount issues ── */
+function CommentItem({ c, reportId, currentUser, onDeleted }) {
+  const [confirming, setConfirming] = useState(false);
+  const [deleting,   setDeleting]   = useState(false);
+
+  const isOwner = currentUser && currentUser.id === c.user?.id;
+
+  const handleDelete = async () => {
+    setDeleting(true);
+    try {
+      await api.delete(`/reports/${reportId}/comments/${c.id}`);
+      toast.success('Komentar dihapus.');
+      onDeleted(c.id);
+    } catch {
+      toast.error('Gagal menghapus komentar.');
+    } finally {
+      setDeleting(false);
+      setConfirming(false);
+    }
+  };
+
+  return (
+    <div style={{ display:'flex', gap:10, padding:'12px 0' }}>
+      {/* Avatar */}
+      <div style={{ width:34, height:34, borderRadius:'50%', flexShrink:0, background:C.green,
+        display:'flex', alignItems:'center', justifyContent:'center',
+        fontFamily:"'Syne',sans-serif", fontSize:12, fontWeight:700, color:C.lime }}>
+        {c.user?.name?.[0]?.toUpperCase() || '?'}
+      </div>
+
+      <div style={{ flex:1, minWidth:0 }}>
+        {/* Header row */}
+        <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', marginBottom:4 }}>
+          <div style={{ display:'flex', alignItems:'center', gap:7 }}>
+            <span style={{ fontFamily:"'DM Sans',sans-serif", fontSize:13, fontWeight:600, color:C.textDk }}>
+              {c.user?.name || 'Anonim'}
+            </span>
+            <span style={{ fontFamily:"'DM Sans',sans-serif", fontSize:11, color:C.textLt }}>
+              {new Date(c.created_at).toLocaleDateString('id-ID', { day:'numeric', month:'short' })}
+            </span>
+          </div>
+
+          {/* Delete button — hanya tampil untuk pemilik komentar */}
+          {isOwner && !confirming && (
+            <button
+              className="del-btn"
+              title="Hapus komentar"
+              onClick={() => setConfirming(true)}
+            >
+              <Trash2 size={13}/>
+            </button>
+          )}
+        </div>
+
+        {/* Comment body */}
+        <p style={{ fontFamily:"'DM Sans',sans-serif", fontSize:13.5, color:C.textMd, lineHeight:1.7 }}>
+          {c.body}
+        </p>
+
+        {/* Inline confirm — muncul setelah tombol hapus ditekan */}
+        {confirming && (
+          <div className="del-confirm" style={{ marginTop:10 }}>
+            <span style={{ fontFamily:"'DM Sans',sans-serif", fontSize:12, color:'#b91c1c', flex:1 }}>
+              Hapus komentar ini?
+            </span>
+            <button
+              onClick={handleDelete}
+              disabled={deleting}
+              style={{
+                background:'#ef4444', color:'#fff', border:'none',
+                borderRadius:8, padding:'5px 14px',
+                fontFamily:"'DM Sans',sans-serif", fontSize:12, fontWeight:600,
+                cursor: deleting ? 'not-allowed' : 'pointer',
+                opacity: deleting ? .6 : 1,
+                transition:'opacity .15s',
+              }}>
+              {deleting ? 'Menghapus…' : 'Hapus'}
+            </button>
+            <button
+              onClick={() => setConfirming(false)}
+              disabled={deleting}
+              style={{
+                background:'transparent', color:C.textMd, border:`1px solid ${C.border}`,
+                borderRadius:8, padding:'5px 12px',
+                fontFamily:"'DM Sans',sans-serif", fontSize:12,
+                cursor:'pointer',
+              }}>
+              Batal
+            </button>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
+/* ════════════════════════════════════════════════════════════════
+   MAIN PAGE
+════════════════════════════════════════════════════════════════ */
 export default function ReportDetailPage() {
   const { id }   = useParams();
   const { user } = useAuth();
@@ -138,7 +252,7 @@ export default function ReportDetailPage() {
   const [loading,    setLoading]   = useState(true);
   const [submitting, setSubmitting]= useState(false);
   const [showPhoto,  setShowPhoto] = useState(false);
-  const [showDetail, setShowDetail]= useState(false); // mobile collapsible detail
+  const [showDetail, setShowDetail]= useState(false);
 
   useEffect(() => {
     api.get(`/reports/${id}`)
@@ -166,6 +280,14 @@ export default function ReportDetailPage() {
       toast.success('Komentar ditambahkan.');
     } catch { toast.error('Gagal mengirim komentar.'); }
     finally { setSubmitting(false); }
+  };
+
+  /* Hapus komentar dari state lokal setelah berhasil dihapus */
+  const handleCommentDeleted = (commentId) => {
+    setReport(r => ({
+      ...r,
+      comments: r.comments.filter(c => c.id !== commentId),
+    }));
   };
 
   const share = () => {
@@ -203,12 +325,9 @@ export default function ReportDetailPage() {
         <div style={{ maxWidth:1160, margin:'0 auto', position:'relative', zIndex:1 }}>
           <div style={{ height:16 }}/>
           <div className="hero-inner fu d1" style={{ padding:'14px 60px 0' }}>
-
             <Link to="/map" className="back-link" style={{ marginBottom:16, display:'inline-flex' }}>
               <ArrowLeft size={13}/> Kembali ke Peta
             </Link>
-
-            {/* Badges */}
             <div style={{ display:'flex', gap:6, flexWrap:'wrap', marginBottom:14 }}>
               <span style={{ background:st.bg, color:st.text, borderRadius:99, padding:'4px 12px', fontFamily:"'DM Sans',sans-serif", fontSize:11, fontWeight:600 }}>{st.label}</span>
               <span style={{ background:'rgba(255,255,255,.1)', color:'rgba(255,255,255,.7)', borderRadius:99, padding:'4px 12px', fontFamily:"'DM Sans',sans-serif", fontSize:11, display:'flex', alignItems:'center', gap:4 }}>
@@ -218,13 +337,9 @@ export default function ReportDetailPage() {
                 <span style={{ width:6, height:6, borderRadius:'50%', background:sv.color, display:'inline-block' }}/>{sv.label}
               </span>
             </div>
-
-            {/* Title */}
             <h1 className="hero-title" style={{ fontFamily:"'Syne',sans-serif", fontWeight:800, fontSize:52, lineHeight:.97, letterSpacing:'-2px', color:'#fff', marginBottom:14, maxWidth:720 }}>
               {report.title}
             </h1>
-
-            {/* Meta */}
             <div style={{ display:'flex', flexWrap:'wrap', gap:14 }}>
               {report.location_text && (
                 <span style={{ display:'flex', alignItems:'center', gap:5, fontFamily:"'DM Sans',sans-serif", fontSize:12.5, color:'rgba(255,255,255,.42)' }}>
@@ -243,7 +358,6 @@ export default function ReportDetailPage() {
             </div>
           </div>
 
-          {/* Hero image */}
           {report.photo_url ? (
             <div className="fu d2" style={{ margin:'20px 20px 0', cursor:'zoom-in' }} onClick={() => setShowPhoto(true)}>
               <div className="hero-img-h" style={{ height:340, borderRadius:'18px 18px 0 0', overflow:'hidden', position:'relative', background:'#0f2318' }}>
@@ -274,7 +388,6 @@ export default function ReportDetailPage() {
             {/* ── Main column ── */}
             <div style={{ display:'flex', flexDirection:'column', gap:14, minWidth:0 }}>
 
-              {/* ── Pelapor info — mobile only (sebelum action bar) ── */}
               {report.user && (
                 <div style={{ display:'none' }} className="mob-reporter">
                   <style>{`@media(max-width:768px){.mob-reporter{display:flex!important;align-items:center;gap:10px;background:#fff;border-radius:16px;padding:14px 16px;border:1px solid ${C.border}}}`}</style>
@@ -288,7 +401,7 @@ export default function ReportDetailPage() {
                 </div>
               )}
 
-              {/* ── Action bar — sosmed style ── */}
+              {/* Action bar */}
               <div className="action-bar" style={{ background:'#fff', borderRadius:18, padding:'12px 18px', border:`1px solid ${C.border}`, display:'flex', alignItems:'center', gap:8, flexWrap:'nowrap', overflowX:'auto' }}>
                 <button onClick={vote} className={`action-pill${report.upvotes > 0?' voted':''}`} style={{ flexShrink:0 }}>
                   <ThumbsUp size={14}/> <span style={{ fontWeight:600 }}>{report.upvotes}</span>
@@ -306,7 +419,7 @@ export default function ReportDetailPage() {
                 </Link>
               </div>
 
-              {/* ── Detail info — mobile collapsible (pola DonatePage) ── */}
+              {/* Mobile detail collapsible */}
               <div style={{ display:'none' }} className="mob-detail-card">
                 <style>{`@media(max-width:768px){.mob-detail-card{display:block!important;background:#fff;border-radius:16px;border:1px solid ${C.border};overflow:hidden}}`}</style>
                 <button type="button" onClick={() => setShowDetail(s => !s)}
@@ -340,7 +453,7 @@ export default function ReportDetailPage() {
                 )}
               </div>
 
-              {/* ── Deskripsi ── */}
+              {/* Deskripsi */}
               <div style={{ background:'#fff', borderRadius:18, padding:'22px 24px', border:`1px solid ${C.border}` }}>
                 <p style={{ fontFamily:"'DM Sans',sans-serif", fontSize:10.5, color:C.textLt, fontWeight:700, letterSpacing:'1px', textTransform:'uppercase', marginBottom:12 }}>Deskripsi</p>
                 <p style={{ fontFamily:"'DM Sans',sans-serif", fontSize:15, color:C.textMd, lineHeight:1.9 }}>
@@ -348,7 +461,7 @@ export default function ReportDetailPage() {
                 </p>
               </div>
 
-              {/* ── Stats cards ── */}
+              {/* Stats cards */}
               {(report.area_affected || report.trees_lost) && (
                 <div className="stat-cards" style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:10 }}>
                   {report.area_affected && (
@@ -391,22 +504,21 @@ export default function ReportDetailPage() {
                   </div>
                 )}
 
-                {report.comments?.length > 0 ? report.comments.map((c, idx) => (
-                  <div key={c.id} style={{ display:'flex', gap:10, padding:'12px 0', borderTop:idx>0?`1px solid ${C.border}`:'none' }}>
-                    <div style={{ width:34, height:34, borderRadius:'50%', flexShrink:0, background:C.green, display:'flex', alignItems:'center', justifyContent:'center', fontFamily:"'Syne',sans-serif", fontSize:12, fontWeight:700, color:C.lime }}>
-                      {c.user?.name?.[0]?.toUpperCase() || '?'}
-                    </div>
-                    <div style={{ flex:1 }}>
-                      <div style={{ display:'flex', alignItems:'center', gap:7, marginBottom:4 }}>
-                        <span style={{ fontFamily:"'DM Sans',sans-serif", fontSize:13, fontWeight:600, color:C.textDk }}>{c.user?.name || 'Anonim'}</span>
-                        <span style={{ fontFamily:"'DM Sans',sans-serif", fontSize:11, color:C.textLt }}>
-                          {new Date(c.created_at).toLocaleDateString('id-ID',{day:'numeric',month:'short'})}
-                        </span>
+                {/* ── Comment list ── */}
+                {report.comments?.length > 0 ? (
+                  <div>
+                    {report.comments.map((c, idx) => (
+                      <div key={c.id} style={{ borderTop: idx > 0 ? `1px solid ${C.border}` : 'none' }}>
+                        <CommentItem
+                          c={c}
+                          reportId={id}
+                          currentUser={user}
+                          onDeleted={handleCommentDeleted}
+                        />
                       </div>
-                      <p style={{ fontFamily:"'DM Sans',sans-serif", fontSize:13.5, color:C.textMd, lineHeight:1.7 }}>{c.body}</p>
-                    </div>
+                    ))}
                   </div>
-                )) : (
+                ) : (
                   <div style={{ textAlign:'center', padding:'20px 0' }}>
                     <p style={{ fontFamily:"'DM Sans',sans-serif", fontSize:13, color:C.textLt }}>Belum ada komentar. Jadilah yang pertama! 💬</p>
                   </div>
@@ -417,7 +529,6 @@ export default function ReportDetailPage() {
 
             {/* ── Sidebar desktop ── */}
             <div className="sidebar" style={{ display:'flex', flexDirection:'column', gap:14, position:'sticky', top:96 }}>
-
               {report.user && (
                 <div className="fu d3" style={{ background:'#fff', borderRadius:22, padding:'20px', border:`1px solid ${C.border}` }}>
                   <p style={{ fontFamily:"'DM Sans',sans-serif", fontSize:10.5, color:C.textLt, fontWeight:700, letterSpacing:'1px', textTransform:'uppercase', marginBottom:12 }}>Pelapor</p>
