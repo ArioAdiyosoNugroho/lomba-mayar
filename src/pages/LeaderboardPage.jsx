@@ -354,16 +354,6 @@ export default function LeaderboardPage() {
               <div style={{ display:'flex', flexDirection:'column', gap:6 }}>
 
                 {/* ── Mobile podium (3 cards side-by-side, hidden on desktop) ── */}
-                {top3.length > 0 && (
-                  <div style={{ display:'none' }} className="mob-podium">
-                    <style>{`@media(max-width:640px){.mob-podium{display:flex!important;gap:8px;margin-bottom:16px}}`}</style>
-                    {/* Reorder: 2nd, 1st, 3rd */}
-                    {[top3[1], top3[0], top3[2]].filter(Boolean).map((entry, i) => (
-                      <PodiumCard key={entry.rank} entry={entry}
-                        delay={[.1, 0, .2][i]}/>
-                    ))}
-                  </div>
-                )}
 
                 {/* ── Desktop: all rows ── */}
                 <div className="desk-rows">
