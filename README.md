@@ -17,9 +17,9 @@ If you are developing a production application, we recommend using TypeScript wi
 
 ## Role Akses
 untuk akses user role gunakan pada aplikasi ini adalah:
-# role = user:
+role = user:
 - lakukan registrasi pada aplikasi yang
 
-# role = admin:
+role = admin:
 - masukkan email:admin@forestguardian.id
 masukkan password:password
