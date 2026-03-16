@@ -119,29 +119,29 @@ function Avatar({ name, size = 40, green = false }) {
 }
 
 /* ── Podium card (mobile top-3 display) ── */
-function PodiumCard({ entry, delay }) {
-  const isFirst = entry.rank === 1;
-  return (
-    <div className={`podium-card${isFirst ? ' first' : ''}`}
-      style={{ animationDelay: `${delay}s` }}>
-      <span style={{ fontSize: isFirst ? 28 : 22 }}>{MEDALS[entry.rank]}</span>
-      <Avatar name={entry.user?.name} size={isFirst ? 48 : 40} green={isFirst}/>
-      <div>
-        <p style={{ fontFamily:"'DM Sans',sans-serif", fontSize: isFirst ? 13.5 : 12.5,
-          fontWeight:700, color:C.textDk, lineHeight:1.3,
-          overflow:'hidden', textOverflow:'ellipsis',
-          display:'-webkit-box', WebkitLineClamp:2, WebkitBoxOrient:'vertical',
-          textAlign:'center' }}>
-          {entry.user?.name || 'Anonim'}
-        </p>
-        <p style={{ fontFamily:"'Syne',sans-serif", fontSize: isFirst ? 17 : 15,
-          fontWeight:800, color:C.greenMd, marginTop:4, textAlign:'center' }}>
-          {entry.total_trees?.toLocaleString('id')} 🌱
-        </p>
-      </div>
-    </div>
-  );
-}
+// function PodiumCard({ entry, delay }) {
+//   const isFirst = entry.rank === 1;
+//   return (
+//     <div className={`podium-card${isFirst ? ' first' : ''}`}
+//       style={{ animationDelay: `${delay}s` }}>
+//       <span style={{ fontSize: isFirst ? 28 : 22 }}>{MEDALS[entry.rank]}</span>
+//       <Avatar name={entry.user?.name} size={isFirst ? 48 : 40} green={isFirst}/>
+//       <div>
+//         <p style={{ fontFamily:"'DM Sans',sans-serif", fontSize: isFirst ? 13.5 : 12.5,
+//           fontWeight:700, color:C.textDk, lineHeight:1.3,
+//           overflow:'hidden', textOverflow:'ellipsis',
+//           display:'-webkit-box', WebkitLineClamp:2, WebkitBoxOrient:'vertical',
+//           textAlign:'center' }}>
+//           {entry.user?.name || 'Anonim'}
+//         </p>
+//         <p style={{ fontFamily:"'Syne',sans-serif", fontSize: isFirst ? 17 : 15,
+//           fontWeight:800, color:C.greenMd, marginTop:4, textAlign:'center' }}>
+//           {entry.total_trees?.toLocaleString('id')} 🌱
+//         </p>
+//       </div>
+//     </div>
+//   );
+// }
 
 /* ── Row item ── */
 function LeaderRow({ entry, showMedal = false }) {
