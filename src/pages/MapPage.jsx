@@ -253,6 +253,87 @@ function MobileListItem({ r, onTap }) {
   );
 }
 
+/* ── Floating Legend (desktop map overlay) ── */
+function FloatingLegend({ filtered }) {
+  return (
+    <div style={{
+      position:'absolute', bottom:28, right:16, zIndex:1000,
+      background:'rgba(255,255,255,.94)', backdropFilter:'blur(14px)',
+      border:`1px solid ${C.border}`, borderRadius:16,
+      padding:'12px 14px',
+      boxShadow:'0 4px 24px rgba(0,0,0,.11)',
+      minWidth:148,
+    }}>
+      {/* Header */}
+      <p style={{
+        fontFamily:"'DM Sans',sans-serif", fontSize:9.5, color:C.textLt,
+        fontWeight:700, letterSpacing:'1.1px', textTransform:'uppercase',
+        marginBottom:10,
+      }}>
+        Tingkat Keparahan
+      </p>
+
+      {/* Rows */}
+      <div style={{ display:'flex', flexDirection:'column', gap:7 }}>
+        {Object.entries(SEVERITY).map(([k, v]) => {
+          const count = filtered.filter(r => r.severity === k).length;
+          return (
+            <div key={k} style={{ display:'flex', alignItems:'center', gap:8 }}>
+              {/* Dot with glow */}
+              <span style={{
+                width:10, height:10, borderRadius:'50%',
+                background:v.color, flexShrink:0,
+                boxShadow:`0 0 0 3px ${v.color}28`,
+              }}/>
+              {/* Label */}
+              <span style={{
+                fontFamily:"'DM Sans',sans-serif", fontSize:12,
+                color:C.textDk, fontWeight:400, flex:1,
+              }}>
+                {v.label}
+              </span>
+              {/* Count pill */}
+              <span style={{
+                fontFamily:"'DM Sans',sans-serif", fontSize:10.5,
+                color: count > 0 ? '#fff' : C.textLt,
+                fontWeight:600,
+                background: count > 0 ? v.color : 'rgba(0,0,0,.06)',
+                borderRadius:99,
+                padding:'1px 7px',
+                minWidth:22,
+                textAlign:'center',
+                transition:'background .2s',
+              }}>
+                {count}
+              </span>
+            </div>
+          );
+        })}
+      </div>
+
+      {/* Divider + total */}
+      <div style={{
+        marginTop:10, paddingTop:9,
+        borderTop:`1px solid ${C.border}`,
+        display:'flex', alignItems:'center', justifyContent:'space-between',
+      }}>
+        <span style={{
+          fontFamily:"'DM Sans',sans-serif", fontSize:10.5,
+          color:C.textLt, fontWeight:500,
+        }}>
+          Total
+        </span>
+        <span style={{
+          fontFamily:"'Syne',sans-serif", fontSize:13,
+          color:C.textDk, fontWeight:700,
+        }}>
+          {filtered.length}
+        </span>
+      </div>
+    </div>
+  );
+}
+
 /* ════════════════════════════════════════════════════════════════
    MAIN PAGE
 ════════════════════════════════════════════════════════════════ */
@@ -344,11 +425,12 @@ export default function MapPage() {
   const desktopLayout = (
     <div style={{ display:'flex', height:'calc(100vh - 80px)' }}>
 
-      {/* Sidebar */}
+      {/* ── Sidebar ── */}
       <aside style={{ width:288, flexShrink:0, background:'#fff',
         borderRight:`1px solid ${C.border}`,
         display:'flex', flexDirection:'column', overflow:'hidden' }}>
 
+        {/* Header */}
         <div style={{ background:C.green, padding:'20px 18px', flexShrink:0 }}>
           <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', marginBottom:6 }}>
             <h2 style={{ fontFamily:"'Syne',sans-serif", fontWeight:700, fontSize:16, color:'#fff' }}>
@@ -389,7 +471,7 @@ export default function MapPage() {
           ))}
         </div>
 
-        {/* Report list */}
+        {/* ── Report list — now takes ALL remaining space ── */}
         <div style={{ flex:1, overflowY:'auto' }}>
           {filtered.length === 0 ? (
             <div style={{ padding:'32px 16px', textAlign:'center' }}>
@@ -407,25 +489,14 @@ export default function MapPage() {
           ))}
         </div>
 
-        {/* Legend */}
-        <div style={{ padding:'14px 16px', borderTop:`1px solid ${C.border}`, flexShrink:0 }}>
-          <p style={{ fontFamily:"'DM Sans',sans-serif", fontSize:10.5, color:C.textLt,
-            fontWeight:600, letterSpacing:'1px', textTransform:'uppercase', marginBottom:10 }}>
-            Tingkat Keparahan
-          </p>
-          <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:7 }}>
-            {Object.entries(SEVERITY).map(([k, v]) => (
-              <div key={k} style={{ display:'flex', alignItems:'center', gap:7 }}>
-                <span style={{ width:9, height:9, borderRadius:'50%', background:v.color, flexShrink:0 }}/>
-                <span style={{ fontFamily:"'DM Sans',sans-serif", fontSize:12, color:C.textMd }}>{v.label}</span>
-              </div>
-            ))}
-          </div>
-        </div>
+        {/* ── Legend removed from here — moved to FloatingLegend on map ── */}
+
       </aside>
 
-      {/* Map */}
+      {/* ── Map ── */}
       <div style={{ flex:1, position:'relative', overflow:'hidden' }}>
+
+        {/* Loading indicator */}
         {loading && (
           <div style={{ position:'absolute', top:12, left:'50%', transform:'translateX(-50%)',
             zIndex:1000, background:'rgba(255,255,255,.92)', backdropFilter:'blur(8px)',
@@ -440,8 +511,10 @@ export default function MapPage() {
             </span>
           </div>
         )}
+
         {mapContent}
-        {/* Stats badge */}
+
+        {/* Stats badge — bottom LEFT */}
         <div style={{ position:'absolute', bottom:28, left:16, zIndex:1000,
           background:'rgba(255,255,255,.92)', backdropFilter:'blur(10px)',
           border:`1px solid ${C.border}`, borderRadius:14, padding:'10px 16px',
@@ -462,6 +535,10 @@ export default function MapPage() {
             </div>
           </>}
         </div>
+
+        {/* ✨ Floating legend — bottom RIGHT */}
+        <FloatingLegend filtered={filtered} />
+
       </div>
     </div>
   );
@@ -638,16 +715,6 @@ export default function MapPage() {
   return (
     <>
       <style>{CSS}</style>
-      {/*
-       * Render desktop & mobile via CSS media query.
-       * PENTING: MapContainer dirender DUA KALI tapi ini tidak masalah
-       * karena masing-masing berada di DOM subtree berbeda dan
-       * tidak shared — ref tidak bentrok.
-       *
-       * Untuk menghindari double-mount sepenuhnya, bisa
-       * gunakan window.innerWidth check, tapi CSS approach
-       * lebih clean untuk SSR compatibility.
-       */}
       <div style={{ display:'none' }} className="desk-show">
         <style>{`@media (min-width:769px){.desk-show{display:block!important}}`}</style>
         {desktopLayout}
