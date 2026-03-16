@@ -41,6 +41,7 @@ const STATUS_REP = {
 const CSS = `
   *, *::before, *::after { box-sizing:border-box; margin:0; padding:0; }
   body { font-family:'DM Sans',sans-serif; background:${C.offWhite}; }
+
   @keyframes fadeUp { from{opacity:0;transform:translateY(14px)} to{opacity:1;transform:translateY(0)} }
   @keyframes spin   { to{transform:rotate(360deg)} }
   .fu  { animation:fadeUp .6s cubic-bezier(.16,1,.3,1) both; }
@@ -97,21 +98,36 @@ const CSS = `
     background:${C.textDk}; display:flex; align-items:center; justify-content:center;
   }
 
+  /* ── Stat card ── */
+  .stat-card {
+    background:rgba(255,255,255,.06);
+    border:1px solid rgba(255,255,255,.1);
+    border-radius:16px; padding:16px 18px;
+    text-align:center; min-width:100px;
+  }
+
+  /* ── Divider line ── */
+  .hero-divider {
+    width:100%; height:1px;
+    background:rgba(255,255,255,.08);
+    margin-top:32px;
+  }
+
   /* ── Responsive ── */
   @media (max-width:640px) {
-    .hero-h1      { font-size:36px !important; letter-spacing:-1.2px !important; }
-    .hero-row     { flex-direction:column !important; align-items:flex-start !important; gap:20px !important; }
-    .stat-grid    { grid-template-columns:1fr 1fr !important; gap:10px !important; }
-    .page-wrap    { padding:20px 14px 64px !important; }
-    .hero-pad     { padding:16px 20px 32px !important; }
-    .avatar-sz    { width:68px !important; height:68px !important; font-size:28px !important; }
-    .tab-row      { width:100% !important; justify-content:stretch !important; }
-    .tab-pill     { flex:1 !important; justify-content:center !important; font-size:13px !important; padding:9px 14px !important; }
-    .don-row      { padding:12px 14px !important; border-radius:14px !important; gap:12px !important; }
-    .rep-row      { padding:12px 14px !important; border-radius:14px !important; gap:12px !important; }
-    .don-amount   { font-size:14px !important; }
-    .hero-stat-v  { font-size:22px !important; }
-    .rep-title    { font-size:13.5px !important; }
+    .hero-main     { flex-direction:column !important; align-items:flex-start !important; gap:20px !important; }
+    .stat-strip    { gap:8px !important; }
+    .stat-card     { min-width:80px !important; padding:12px 12px !important; }
+    .page-wrap     { padding:20px 14px 64px !important; }
+    .hero-pad      { padding:20px 16px 28px !important; }
+    .hero-name     { font-size:36px !important; letter-spacing:-1px !important; }
+    .tab-row       { width:100% !important; justify-content:stretch !important; }
+    .tab-pill      { flex:1 !important; justify-content:center !important; font-size:13px !important; padding:9px 14px !important; }
+    .don-row       { padding:12px 14px !important; border-radius:14px !important; gap:12px !important; }
+    .rep-row       { padding:12px 14px !important; border-radius:14px !important; gap:12px !important; }
+    .don-amount    { font-size:14px !important; }
+    .hero-stat-v   { font-size:22px !important; }
+    .rep-title     { font-size:13.5px !important; }
   }
 `;
 
@@ -131,15 +147,14 @@ function StatusBadge({ cfg }) {
 }
 
 /* ── Avatar ── */
-function Avatar({ initial, size = 88, fontSize = 36 }) {
+function Avatar({ initial }) {
   return (
-    <div className="avatar-sz" style={{
-      width:size, height:size, borderRadius:'50%', flexShrink:0,
+    <div style={{
+      width:64, height:64, borderRadius:'50%', flexShrink:0,
       background:`linear-gradient(135deg,${C.greenMd},${C.green})`,
-      border:'3px solid rgba(181,226,53,.35)',
+      border:'2px solid rgba(181,226,53,.25)',
       display:'flex', alignItems:'center', justifyContent:'center',
-      fontFamily:"'Syne',sans-serif", fontSize, fontWeight:800, color:C.lime,
-      boxShadow:'0 8px 28px rgba(0,0,0,.28)',
+      fontFamily:"'Syne',sans-serif", fontSize:26, fontWeight:800, color:C.lime,
     }}>
       {initial}
     </div>
@@ -178,76 +193,88 @@ export default function ProfilePage() {
     .filter(d => d.status === 'paid')
     .reduce((s, d) => s + (d.trees_count || 0), 0);
 
+  const stats = [
+    { val: totalTrees || user?.total_trees_planted || 0, label:'Pohon Ditanam', color:C.lime    },
+    { val: donations.length,                              label:'Total Donasi',  color:'#fbbf24' },
+    { val: reports.length,                                label:'Laporan',       color:'#60a5fa' },
+  ];
+
   /* ═══════════════════════════════════════════════════════════ */
   return (
     <>
       <style>{CSS}</style>
 
       {/* ── HERO ── */}
-      <div style={{ position:'relative', overflow:'hidden', background:C.green }}>
-        {/* Decorative blobs */}
-        <div style={{ position:'absolute', right:-80, top:-80, width:300, height:300,
-          borderRadius:'50%', background:'rgba(181,226,53,.06)', pointerEvents:'none' }}/>
-        <div style={{ position:'absolute', left:-40, bottom:-40, width:200, height:200,
-          borderRadius:'50%', background:'rgba(181,226,53,.04)', pointerEvents:'none' }}/>
-
-        <div style={{ maxWidth:1100, margin:'0 auto', position:'relative', zIndex:1 }}>
+      <div style={{ background:C.green }}>
+        <div style={{ maxWidth:1100, margin:'0 auto' }}>
+          {/* spacer for navbar */}
           <div style={{ height:80 }}/>
-          <div className="fu d1 hero-pad" style={{ padding:'20px 60px 48px' }}>
 
-            {/* Top row: avatar + name + stats */}
-            <div className="hero-row" style={{ display:'flex', alignItems:'flex-end',
-              justifyContent:'space-between', gap:28, flexWrap:'wrap' }}>
+          <div className="fu d1 hero-pad" style={{ padding:'28px 60px 40px' }}>
 
-              {/* Avatar + name */}
-              <div style={{ display:'flex', alignItems:'flex-end', gap:20 }}>
-                <Avatar initial={initials}/>
-                <div style={{ paddingBottom:4 }}>
-                  {/* Member badge */}
-                  <div style={{
-                    display:'inline-flex', alignItems:'center', gap:6,
-                    background:'rgba(181,226,53,.14)', border:'1px solid rgba(181,226,53,.22)',
-                    borderRadius:99, padding:'4px 12px', marginBottom:10,
-                  }}>
-                    <span style={{ width:5, height:5, borderRadius:'50%',
-                      background:C.lime, display:'inline-block',
-                      boxShadow:`0 0 8px ${C.lime}` }}/>
-                    <span style={{ fontFamily:"'DM Sans',sans-serif",
-                      fontSize:11.5, color:C.lime, fontWeight:600 }}>
-                      Member Aktif
-                    </span>
-                  </div>
-                  <h1 className="hero-h1" style={{
-                    fontFamily:"'Syne',sans-serif", fontWeight:800, fontSize:50,
-                    lineHeight:.96, letterSpacing:'-2px', color:'#fff',
-                  }}>{user?.name}</h1>
-                  <p style={{ fontFamily:"'DM Sans',sans-serif", fontSize:13,
-                    color:'rgba(255,255,255,.38)', marginTop:8 }}>{user?.email}</p>
-                </div>
-              </div>
-
-              {/* Stat cards */}
-              <div className="stat-grid" style={{
-                display:'grid', gridTemplateColumns:'repeat(3,1fr)', gap:12,
+            {/* Member badge */}
+            <div style={{
+              display:'inline-flex', alignItems:'center', gap:6,
+              marginBottom:20,
+            }}>
+              <span style={{
+                width:5, height:5, borderRadius:'50%',
+                background:C.lime, display:'inline-block',
+                boxShadow:`0 0 8px ${C.lime}`,
+              }}/>
+              <span style={{
+                fontFamily:"'DM Sans',sans-serif",
+                fontSize:11.5, color:'rgba(255,255,255,.45)',
+                fontWeight:500, letterSpacing:'.4px',
               }}>
-                {[
-                  { val: totalTrees || user?.total_trees_planted || 0, label:'Pohon Ditanam', color:C.lime         },
-                  { val: donations.length,                              label:'Total Donasi',  color:'#fbbf24'      },
-                  { val: reports.length,                                label:'Laporan',       color:'#60a5fa'      },
-                ].map(({ val, label, color }) => (
-                  <div key={label} style={{
-                    background:'rgba(255,255,255,.07)',
-                    border:'1px solid rgba(255,255,255,.1)',
-                    borderRadius:16, padding:'16px 14px', textAlign:'center',
-                  }}>
-                    <p className="hero-stat-v" style={{ fontFamily:"'Syne',sans-serif",
-                      fontSize:26, fontWeight:800, color, lineHeight:1 }}>{val}</p>
-                    <p style={{ fontFamily:"'DM Sans',sans-serif", fontSize:10.5,
-                      color:'rgba(255,255,255,.36)', marginTop:5 }}>{label}</p>
-                  </div>
-                ))}
+                Member Aktif
+              </span>
+            </div>
+
+            {/* Avatar + name row */}
+            <div className="hero-main" style={{ display:'flex', alignItems:'center', gap:18, marginBottom:28 }}>
+              <Avatar initial={initials}/>
+              <div>
+                <h1 className="hero-name" style={{
+                  fontFamily:"'Syne',sans-serif", fontWeight:800,
+                  fontSize:44, lineHeight:.96, letterSpacing:'-1.5px',
+                  color:'#fff',
+                }}>
+                  {user?.name}
+                </h1>
+                <p style={{
+                  fontFamily:"'DM Sans',sans-serif", fontSize:13,
+                  color:'rgba(255,255,255,.35)', marginTop:6,
+                }}>
+                  {user?.email}
+                </p>
               </div>
             </div>
+
+            {/* Thin separator */}
+            <div style={{ width:'100%', height:'1px', background:'rgba(255,255,255,.07)', marginBottom:24 }}/>
+
+            {/* Stat strip */}
+            <div className="stat-strip" style={{ display:'flex', gap:12, flexWrap:'wrap' }}>
+              {stats.map(({ val, label, color }) => (
+                <div key={label} className="stat-card">
+                  <p className="hero-stat-v" style={{
+                    fontFamily:"'Syne',sans-serif",
+                    fontSize:24, fontWeight:800, color, lineHeight:1,
+                  }}>
+                    {val}
+                  </p>
+                  <p style={{
+                    fontFamily:"'DM Sans',sans-serif",
+                    fontSize:10.5, color:'rgba(255,255,255,.32)',
+                    marginTop:5, whiteSpace:'nowrap',
+                  }}>
+                    {label}
+                  </p>
+                </div>
+              ))}
+            </div>
+
           </div>
         </div>
       </div>
@@ -256,11 +283,12 @@ export default function ProfilePage() {
       <div style={{ background:C.offWhite }}>
         <div className="page-wrap" style={{ maxWidth:1100, margin:'0 auto', padding:'28px 60px 80px' }}>
 
-          {/* Error */}
           {error && (
-            <div style={{ background:'#fef2f2', border:'1px solid #fecaca',
+            <div style={{
+              background:'#fef2f2', border:'1px solid #fecaca',
               borderRadius:12, padding:'12px 16px', marginBottom:18,
-              color:'#b91c1c', fontFamily:"'DM Sans',sans-serif", fontSize:13 }}>
+              color:'#b91c1c', fontFamily:"'DM Sans',sans-serif", fontSize:13,
+            }}>
               {error}
             </div>
           )}
@@ -273,7 +301,7 @@ export default function ProfilePage() {
           }}>
             {[
               { key:'donations', label:'Riwayat Donasi', Icon:Heart    },
-              { key:'reports',   label:'Laporan',   Icon:FileText },
+              { key:'reports',   label:'Laporan',        Icon:FileText },
             ].map(({ key, label, Icon }) => (
               <button key={key}
                 className={`tab-pill ${tab===key?'active':'inactive'}`}
@@ -294,9 +322,11 @@ export default function ProfilePage() {
           {/* ── Loading ── */}
           {loading && (
             <div style={{ textAlign:'center', padding:60 }}>
-              <div style={{ width:36, height:36, borderRadius:'50%',
+              <div style={{
+                width:36, height:36, borderRadius:'50%',
                 border:`3px solid ${C.border}`, borderTopColor:C.greenMd,
-                animation:'spin 1s linear infinite', margin:'0 auto 12px' }}/>
+                animation:'spin 1s linear infinite', margin:'0 auto 12px',
+              }}/>
               <p style={{ fontFamily:"'DM Sans',sans-serif", color:C.textLt, fontSize:13 }}>
                 Memuat data…
               </p>
@@ -306,7 +336,6 @@ export default function ProfilePage() {
           {/* ══ TAB: DONASI ══ */}
           {!loading && tab === 'donations' && (
             <div className="fu d3" style={{ display:'flex', flexDirection:'column', gap:10 }}>
-
               {donations.length === 0 ? (
                 <EmptyState
                   icon={<TreePine size={40} color="rgba(0,0,0,.1)"/>}
@@ -318,17 +347,18 @@ export default function ProfilePage() {
                 const st = STATUS_DON[d.status] ?? STATUS_DON.pending;
                 return (
                   <div key={d.id} className="don-row">
-                    {/* Icon */}
-                    <div style={{ width:46, height:46, borderRadius:13, flexShrink:0,
+                    <div style={{
+                      width:46, height:46, borderRadius:13, flexShrink:0,
                       background:'#f0fdf4', border:'1px solid #bbf7d0',
-                      display:'flex', alignItems:'center', justifyContent:'center' }}>
+                      display:'flex', alignItems:'center', justifyContent:'center',
+                    }}>
                       <TreePine size={20} color={C.greenMd}/>
                     </div>
-
-                    {/* Info */}
                     <div style={{ flex:1, minWidth:0 }}>
-                      <p style={{ fontFamily:"'DM Sans',sans-serif", fontSize:14.5,
-                        fontWeight:600, color:C.textDk, marginBottom:3 }}>
+                      <p style={{
+                        fontFamily:"'DM Sans',sans-serif", fontSize:14.5,
+                        fontWeight:600, color:C.textDk, marginBottom:3,
+                      }}>
                         {d.trees_count} pohon
                       </p>
                       <p style={{ fontFamily:"'DM Sans',sans-serif", fontSize:12, color:C.textLt }}>
@@ -341,12 +371,14 @@ export default function ProfilePage() {
                         )}
                       </p>
                     </div>
-
-                    {/* Amount + status */}
-                    <div style={{ textAlign:'right', flexShrink:0, display:'flex',
-                      flexDirection:'column', alignItems:'flex-end', gap:6 }}>
-                      <p className="don-amount" style={{ fontFamily:"'Syne',sans-serif",
-                        fontSize:16, fontWeight:700, color:C.textDk }}>
+                    <div style={{
+                      textAlign:'right', flexShrink:0, display:'flex',
+                      flexDirection:'column', alignItems:'flex-end', gap:6,
+                    }}>
+                      <p className="don-amount" style={{
+                        fontFamily:"'Syne',sans-serif",
+                        fontSize:16, fontWeight:700, color:C.textDk,
+                      }}>
                         {d.amount_formatted || `Rp ${d.amount?.toLocaleString('id')}`}
                       </p>
                       <StatusBadge cfg={st}/>
@@ -360,7 +392,6 @@ export default function ProfilePage() {
           {/* ══ TAB: LAPORAN ══ */}
           {!loading && tab === 'reports' && (
             <div className="fu d3" style={{ display:'flex', flexDirection:'column', gap:10 }}>
-
               {reports.length === 0 ? (
                 <EmptyState
                   icon={<FileText size={40} color="rgba(0,0,0,.1)"/>}
@@ -373,36 +404,36 @@ export default function ProfilePage() {
                 const { Icon: StIcon } = st;
                 return (
                   <Link key={r.id} to={`/reports/${r.id}`} className="rep-row">
-                    {/* Status icon */}
-                    <div style={{ width:46, height:46, borderRadius:13, flexShrink:0,
+                    <div style={{
+                      width:46, height:46, borderRadius:13, flexShrink:0,
                       background:st.bg, border:`1px solid ${st.text}22`,
-                      display:'flex', alignItems:'center', justifyContent:'center' }}>
+                      display:'flex', alignItems:'center', justifyContent:'center',
+                    }}>
                       <StIcon size={18} color={st.text}/>
                     </div>
-
-                    {/* Info */}
                     <div style={{ flex:1, minWidth:0 }}>
-                      <p className="rep-title" style={{ fontFamily:"'DM Sans',sans-serif",
+                      <p className="rep-title" style={{
+                        fontFamily:"'DM Sans',sans-serif",
                         fontSize:14.5, fontWeight:600, color:C.textDk, marginBottom:5,
-                        overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap' }}>
+                        overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap',
+                      }}>
                         {r.title}
                       </p>
                       <div style={{ display:'flex', gap:10, flexWrap:'wrap', alignItems:'center' }}>
                         {r.location_text && (
-                          <span style={{ display:'flex', alignItems:'center', gap:4,
-                            fontFamily:"'DM Sans',sans-serif", fontSize:12, color:C.textLt }}>
+                          <span style={{
+                            display:'flex', alignItems:'center', gap:4,
+                            fontFamily:"'DM Sans',sans-serif", fontSize:12, color:C.textLt,
+                          }}>
                             <MapPin size={11} color={C.greenMd}/> {r.location_text}
                           </span>
                         )}
-                        <span style={{ fontFamily:"'DM Sans',sans-serif",
-                          fontSize:12, color:C.textLt }}>
+                        <span style={{ fontFamily:"'DM Sans',sans-serif", fontSize:12, color:C.textLt }}>
                           {new Date(r.created_at).toLocaleDateString('id-ID',
                             { day:'numeric', month:'short', year:'numeric' })}
                         </span>
                       </div>
                     </div>
-
-                    {/* Status badge */}
                     <div style={{ flexShrink:0 }}>
                       <StatusBadge cfg={st}/>
                     </div>
@@ -421,13 +452,23 @@ export default function ProfilePage() {
 /* ── Empty state ── */
 function EmptyState({ icon, title, desc, cta }) {
   return (
-    <div style={{ background:'#fff', borderRadius:22, border:`1px solid ${C.border}`,
-      padding:'52px 28px', textAlign:'center' }}>
+    <div style={{
+      background:'#fff', borderRadius:22, border:`1px solid ${C.border}`,
+      padding:'52px 28px', textAlign:'center',
+    }}>
       <div style={{ marginBottom:14 }}>{icon}</div>
-      <p style={{ fontFamily:"'Syne',sans-serif", fontSize:18, fontWeight:700,
-        color:C.textDk, marginBottom:8 }}>{title}</p>
-      <p style={{ fontFamily:"'DM Sans',sans-serif", fontSize:13.5,
-        color:C.textLt, marginBottom:22, lineHeight:1.6 }}>{desc}</p>
+      <p style={{
+        fontFamily:"'Syne',sans-serif", fontSize:18, fontWeight:700,
+        color:C.textDk, marginBottom:8,
+      }}>
+        {title}
+      </p>
+      <p style={{
+        fontFamily:"'DM Sans',sans-serif", fontSize:13.5,
+        color:C.textLt, marginBottom:22, lineHeight:1.6,
+      }}>
+        {desc}
+      </p>
       <Link to={cta.to} className="btn-lime">
         {cta.label}
         <span className="ac"><ArrowRight size={13} color={C.lime}/></span>
