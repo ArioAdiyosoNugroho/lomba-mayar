@@ -207,12 +207,12 @@ export default function ProfilePage() {
       {/* ── HERO ── */}
       <div style={{ background:C.green }}>
         <div style={{ maxWidth:1100, margin:'0 auto' }}>
-          {/* spacer for navbar */}
-          <div style={{ height:80 }}/>
+          {/* spacer for navbar
+          <div style={{ height:80 }}/> */}
 
           <div className="fu d1 hero-pad" style={{ padding:'28px 60px 40px' }}>
 
-            {/* Member badge */}
+            {/* Member badge
             <div style={{
               display:'inline-flex', alignItems:'center', gap:6,
               marginBottom:20,
@@ -229,7 +229,7 @@ export default function ProfilePage() {
               }}>
                 Member Aktif
               </span>
-            </div>
+            </div> */}
 
             {/* Avatar + name row */}
             <div className="hero-main" style={{ display:'flex', alignItems:'center', gap:18, marginBottom:28 }}>

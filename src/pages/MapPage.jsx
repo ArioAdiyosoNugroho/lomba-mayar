@@ -555,7 +555,7 @@ export default function MapPage() {
       </div>
 
       {/* Top bar */}
-      <div style={{ position:'absolute', top:12, left:12, right:12, zIndex:1000,
+      <div style={{ position:'absolute', top:12, left:50, right:12, zIndex:1000,
         display:'flex', alignItems:'center', gap:8 }}>
         <div style={{ flex:1, background:'rgba(255,255,255,.95)', backdropFilter:'blur(10px)',
           border:`1px solid ${C.border}`, borderRadius:14, padding:'10px 14px',
