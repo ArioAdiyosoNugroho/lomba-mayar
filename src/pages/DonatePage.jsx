@@ -219,7 +219,7 @@ export default function DonatePage() {
                 }}>{p.trees} pohon</span>
               </div>
               {isActive && (
-                <CheckCircle size={18} color={C.lime} style={{ flexShrink:0 }}/>
+                <CheckCircle size={18} color={C.lime} style={{ flexShrink:0, marginLeft:'auto' }}/>
               )}
             </button>
           );
