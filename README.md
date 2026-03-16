@@ -23,4 +23,4 @@ role = user:
 
 role = admin:
 - masukkan email:admin@forestguardian.id
-masukkan password:password
+- masukkan password:password
