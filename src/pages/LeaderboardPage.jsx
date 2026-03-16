@@ -352,9 +352,6 @@ export default function LeaderboardPage() {
 
               {/* ── LEFT: list ── */}
               <div style={{ display:'flex', flexDirection:'column', gap:6 }}>
-
-                {/* ── Mobile podium (3 cards side-by-side, hidden on desktop) ── */}
-
                 {/* ── Desktop: all rows ── */}
                 <div className="desk-rows">
                   <style>{`@media(max-width:640px){.desk-rows .top3-rows{display:none}}`}</style>
@@ -401,29 +398,6 @@ export default function LeaderboardPage() {
                     <LeaderRow key={entry.rank} entry={entry}/>
                   ))}
                 </div>
-
-                {/* Mobile CTA (below list) */}
-                {/* <div className="mob-cta" style={{ display:'none', marginTop:8 }}>
-                  <style>{`@media(max-width:640px){.mob-cta{display:block!important}}`}</style>
-                  <div style={{ background:C.green, borderRadius:18, padding:'20px',
-                    position:'relative', overflow:'hidden' }}>
-                    <div style={{ position:'absolute', right:-20, top:-20,
-                      width:100, height:100, borderRadius:'50%',
-                      background:'rgba(181,226,53,.07)', pointerEvents:'none' }}/>
-                    <h3 style={{ fontFamily:"'Syne',sans-serif", fontSize:20, fontWeight:800,
-                      color:'#fff', lineHeight:1.1, marginBottom:6, position:'relative' }}>
-                      Masuk ke <span style={{ color:C.lime }}>Hall of Fame</span>
-                    </h3>
-                    <p style={{ fontFamily:"'DM Sans',sans-serif", fontSize:12.5,
-                      color:'rgba(255,255,255,.42)', lineHeight:1.7, marginBottom:16, position:'relative' }}>
-                      Rp 5.000 = 1 pohon atas namamu
-                    </p>
-                    <Link to="/donate" className="btn-cta"
-                      style={{ width:'100%', justifyContent:'center', position:'relative' }}>
-                      Donasi Pohon <span className="ic"><ArrowRight size={13} color={C.lime}/></span>
-                    </Link>
-                  </div>
-                </div> */}
 
               </div>
 

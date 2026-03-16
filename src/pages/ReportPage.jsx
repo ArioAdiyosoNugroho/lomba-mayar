@@ -43,7 +43,6 @@ const SEVERITIES = [
   { value:'critical', label:'Kritis',  color:'#ef4444', bg:'#fef2f2' },
 ];
 
-/* ─── CSS — identik dengan DonatePage ─────────────────────── */
 const CSS = `
   *, *::before, *::after { box-sizing:border-box; margin:0; padding:0; }
   html { scroll-behavior:smooth; }
@@ -57,7 +56,6 @@ const CSS = `
   .d2  { animation-delay:.16s; }
   .d3  { animation-delay:.25s; }
 
-  /* ── form elements ── */
   .f-label {
     display:block; font-family:'DM Sans',sans-serif; font-size:11px; font-weight:600;
     color:${C.textLt}; letter-spacing:.6px; text-transform:uppercase; margin-bottom:7px;
@@ -74,13 +72,11 @@ const CSS = `
   .f-input.err    { border-color:#ef4444 !important; }
   .err-msg        { font-family:'DM Sans',sans-serif; font-size:12px; color:#ef4444; margin-top:5px; }
 
-  /* ── section card ── */
   .s-card  { background:#fff; border-radius:22px; border:1px solid ${C.border}; padding:26px; }
   .s-head  { display:flex; align-items:center; gap:10px; margin-bottom:18px; }
   .s-icon  { width:34px; height:34px; border-radius:10px; display:flex; align-items:center; justify-content:center; flex-shrink:0; }
   .s-title { font-family:'Syne',sans-serif; font-size:16px; font-weight:700; color:${C.textDk}; }
 
-  /* ── type button ── */
   .type-btn {
     padding:12px 6px; border-radius:14px; border:2px solid ${C.border};
     background:#fff; cursor:pointer; text-align:center; transition:all .15s;
@@ -90,7 +86,6 @@ const CSS = `
   .type-btn:active { transform:scale(.95); }
   .type-btn.active { border-color:${C.green}; background:${C.green}; }
 
-  /* ── severity button ── */
   .sev-btn {
     flex:1; padding:12px 6px; border-radius:12px; border:2px solid ${C.border};
     background:#fff; cursor:pointer; text-align:center; transition:all .15s; min-width:60px;
@@ -98,7 +93,6 @@ const CSS = `
   }
   .sev-btn:active { transform:scale(.96); }
 
-  /* ── geo button ── */
   .geo-btn {
     display:inline-flex; align-items:center; gap:6px;
     background:rgba(45,106,79,.09); color:${C.greenMd}; border:none; border-radius:99px;
@@ -109,7 +103,6 @@ const CSS = `
   .geo-btn:hover    { background:rgba(45,106,79,.15); }
   .geo-btn:disabled { opacity:.4; cursor:not-allowed; }
 
-  /* ── submit button ── */
   .btn-submit {
     display:flex; align-items:center; justify-content:center; gap:10px;
     background:${C.lime}; color:${C.textDk};
@@ -129,7 +122,6 @@ const CSS = `
   }
   .btn-submit:hover:not(:disabled) .ic { transform:translateX(4px); }
 
-  /* ── mobile sticky footer ── */
   .mob-footer {
     position:fixed; bottom:0; left:0; right:0; z-index:100;
     background:#fff; padding:12px 16px 20px;
@@ -138,7 +130,6 @@ const CSS = `
     display:none;
   }
 
-  /* ── trust chips ── */
   .trust-chip {
     display:inline-flex; align-items:center; gap:5px;
     font-family:'DM Sans',sans-serif; font-size:11.5px;
@@ -146,26 +137,17 @@ const CSS = `
     border-radius:99px; padding:5px 10px;
   }
 
-  /* ─── RESPONSIVE — mirrors DonatePage exactly ─── */
   @media (max-width:768px) {
-    /* Show mobile footer, hide right column */
     .mob-footer  { display:block !important; }
     .right-col   { display:none !important; }
-    /* Hide desktop-only sections */
     .desk-cta    { display:none !important; }
-
-    /* Single column */
     .report-grid { grid-template-columns:1fr !important; gap:0 !important; }
-
-    /* Spacing — 200px bottom so trust chips not hidden behind footer */
     .page-wrap   { padding:20px 16px 200px !important; }
     .hero-wrap   { padding:16px 20px 36px !important; min-height:auto !important; }
     .hero-title  { font-size:42px !important; letter-spacing:-1.5px !important; }
     .hero-stats  { gap:20px !important; flex-wrap:wrap !important; }
     .stat-val    { font-size:20px !important; }
     .s-card      { border-radius:18px !important; padding:20px !important; }
-
-    /* Form layout */
     .type-grid   { grid-template-columns:repeat(3,1fr) !important; }
     .coord-row   { grid-template-columns:1fr !important; }
     .extra-row   { grid-template-columns:1fr 1fr !important; }
@@ -177,11 +159,150 @@ const CSS = `
   }
 `;
 
-/* ═══════════════════════════════════════════════════════════════ */
+/* ════════════════════════════════════════════════════════════════
+   Sub-components OUTSIDE ReportPage — WAJIB di luar agar React
+   tidak unmount/remount tiap render, yang menyebabkan fokus input
+   hilang setiap kali user mengetik 1 karakter.
+════════════════════════════════════════════════════════════════ */
+
+/* ── Location fields ── */
+function LocationFields({ form, set, errors, geoLoading, detectLocation }) {
+  return (
+    <div style={{ display:'flex', flexDirection:'column', gap:14 }}>
+      <div className="coord-row" style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:12 }}>
+        <div>
+          <label className="f-label">Latitude <span style={{ color:'#ef4444' }}>*</span></label>
+          <input
+            value={form.lat}
+            onChange={e => set('lat', e.target.value)}
+            placeholder="-6.200000"
+            inputMode="decimal"
+            className={`f-input${errors.lat ? ' err' : ''}`}
+          />
+          {errors.lat && <p className="err-msg">{errors.lat[0]}</p>}
+        </div>
+        <div>
+          <label className="f-label">Longitude <span style={{ color:'#ef4444' }}>*</span></label>
+          <input
+            value={form.lng}
+            onChange={e => set('lng', e.target.value)}
+            placeholder="106.800000"
+            inputMode="decimal"
+            className={`f-input${errors.lng ? ' err' : ''}`}
+          />
+          {errors.lng && <p className="err-msg">{errors.lng[0]}</p>}
+        </div>
+      </div>
+      <div>
+        <label className="f-label">Nama Lokasi</label>
+        <input
+          value={form.location_text}
+          onChange={e => set('location_text', e.target.value)}
+          placeholder="Contoh: Kalimantan Tengah, Kab. Kotawaringin"
+          className="f-input"
+        />
+      </div>
+      <div style={{
+        display:'flex', alignItems:'flex-start', gap:9,
+        background:'rgba(14,165,233,.06)', border:'1px solid rgba(14,165,233,.12)',
+        borderRadius:12, padding:'11px 14px',
+      }}>
+        <Info size={14} color='#0ea5e9' style={{ flexShrink:0, marginTop:1 }}/>
+        <p style={{ fontFamily:"'DM Sans',sans-serif", fontSize:12.5, color:C.textMd, lineHeight:1.55 }}>
+          Klik <strong>Deteksi Otomatis</strong> atau salin koordinat dari Google Maps.
+        </p>
+      </div>
+    </div>
+  );
+}
+
+/* ── Preview card (right column, desktop) ── */
+function PreviewCard({ form, activeType, activeSev }) {
+  return (
+    <div style={{ background:C.green, borderRadius:22, padding:'28px',
+      position:'relative', overflow:'hidden' }}>
+      <div style={{ position:'absolute', right:-40, top:-40,
+        width:160, height:160, borderRadius:'50%',
+        background:'rgba(181,226,53,.07)', pointerEvents:'none' }}/>
+
+      <p style={{ fontFamily:"'DM Sans',sans-serif", fontSize:11,
+        color:'rgba(255,255,255,.35)', letterSpacing:'.8px',
+        textTransform:'uppercase', marginBottom:20 }}>
+        Pratinjau Laporan
+      </p>
+
+      <div style={{ textAlign:'center', padding:'14px 0 22px',
+        borderBottom:'1px solid rgba(255,255,255,.1)', marginBottom:20 }}>
+        {form.title ? (
+          <p style={{ fontFamily:"'Syne',sans-serif", fontSize:17, fontWeight:800,
+            color:'#fff', lineHeight:1.25, padding:'0 8px' }}>
+            {form.title}
+          </p>
+        ) : (
+          <div style={{ padding:'6px 0' }}>
+            <FileText size={40} color="rgba(255,255,255,.1)"
+              style={{ margin:'0 auto 8px', display:'block' }}/>
+            <p style={{ fontFamily:"'DM Sans',sans-serif", fontSize:13,
+              color:'rgba(255,255,255,.2)' }}>Judul belum diisi</p>
+          </div>
+        )}
+      </div>
+
+      <div style={{ display:'flex', flexDirection:'column', gap:11, marginBottom:20 }}>
+        {[
+          { l:'Jenis',     v:`${activeType?.emoji} ${activeType?.label}`           },
+          { l:'Keparahan', v: activeSev?.label,   color: activeSev?.color          },
+          { l:'Lokasi',    v: form.location_text || (form.lat ? `${form.lat}, ${form.lng}` : '—') },
+        ].map(({ l, v, color }) => (
+          <div key={l} style={{ display:'flex', justifyContent:'space-between', alignItems:'center', gap:12 }}>
+            <span style={{ fontFamily:"'DM Sans',sans-serif", fontSize:13,
+              color:'rgba(255,255,255,.4)', flexShrink:0 }}>{l}</span>
+            <span style={{ fontFamily:"'DM Sans',sans-serif", fontSize:13.5,
+              fontWeight:600, color: color ?? 'rgba(255,255,255,.75)',
+              textAlign:'right', overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap' }}>
+              {v || '—'}
+            </span>
+          </div>
+        ))}
+        {(form.area_affected || form.trees_lost) && (
+          <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:10, marginTop:6 }}>
+            {form.area_affected && (
+              <div style={{ background:'rgba(255,255,255,.07)', borderRadius:12, padding:'12px' }}>
+                <p style={{ fontFamily:"'Syne',sans-serif", fontSize:22, fontWeight:800,
+                  color:'#fb923c', lineHeight:1 }}>{form.area_affected}</p>
+                <p style={{ fontFamily:"'DM Sans',sans-serif", fontSize:11,
+                  color:'rgba(255,255,255,.28)', marginTop:3 }}>hektar</p>
+              </div>
+            )}
+            {form.trees_lost && (
+              <div style={{ background:'rgba(255,255,255,.07)', borderRadius:12, padding:'12px' }}>
+                <p style={{ fontFamily:"'Syne',sans-serif", fontSize:22, fontWeight:800,
+                  color:'#f87171', lineHeight:1 }}>{parseInt(form.trees_lost).toLocaleString('id')}</p>
+                <p style={{ fontFamily:"'DM Sans',sans-serif", fontSize:11,
+                  color:'rgba(255,255,255,.28)', marginTop:3 }}>pohon hilang</p>
+              </div>
+            )}
+          </div>
+        )}
+      </div>
+
+      <div style={{ borderTop:'1px solid rgba(255,255,255,.1)', paddingTop:16 }}>
+        {['✅ Diverifikasi tim kami','📡 Diteruskan ke otoritas','🌿 Tercatat transparan'].map(t => (
+          <p key={t} style={{ fontFamily:"'DM Sans',sans-serif", fontSize:12.5,
+            color:'rgba(255,255,255,.35)', marginBottom:7 }}>{t}</p>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+/* ════════════════════════════════════════════════════════════════
+   MAIN PAGE
+════════════════════════════════════════════════════════════════ */
 export default function ReportPage() {
-  const navigate    = useNavigate();
-  const formRef     = useRef(null);
-  const extraRef    = useRef(null);
+  const navigate = useNavigate();
+  const formRef  = useRef(null);
+  const extraRef = useRef(null);
 
   const [loading,    setLoading]    = useState(false);
   const [geoLoading, setGeoLoading] = useState(false);
@@ -189,7 +310,7 @@ export default function ReportPage() {
   const [photo,      setPhoto]      = useState(null);
   const [errors,     setErrors]     = useState({});
   const [showExtra,  setShowExtra]  = useState(false);
-  const [showInfo,   setShowInfo]   = useState(false); // mobile donor info collapse
+  const [showInfo,   setShowInfo]   = useState(false);
 
   const [form, setForm] = useState({
     title:'', description:'', lat:'', lng:'',
@@ -244,7 +365,6 @@ export default function ReportPage() {
   const activeSev  = SEVERITIES.find(s => s.value === form.severity);
   const activeType = TYPES.find(t => t.value === form.report_type);
 
-  /* progress dots for mobile footer */
   const progress = [
     !!form.title && !!form.description,
     !!form.report_type,
@@ -252,133 +372,11 @@ export default function ReportPage() {
   ];
   const progressCount = progress.filter(Boolean).length;
 
-  /* ─── Shared info fields (optional donor-like info) ─────── */
-  function LocationFields() {
-    return (
-      <div style={{ display:'flex', flexDirection:'column', gap:14 }}>
-        <div className="coord-row" style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:12 }}>
-          <div>
-            <label className="f-label">Latitude <span style={{ color:'#ef4444' }}>*</span></label>
-            <input value={form.lat} onChange={e => set('lat', e.target.value)}
-              placeholder="-6.200000" inputMode="decimal"
-              className={`f-input${errors.lat ? ' err' : ''}`}/>
-            {errors.lat && <p className="err-msg">{errors.lat[0]}</p>}
-          </div>
-          <div>
-            <label className="f-label">Longitude <span style={{ color:'#ef4444' }}>*</span></label>
-            <input value={form.lng} onChange={e => set('lng', e.target.value)}
-              placeholder="106.800000" inputMode="decimal"
-              className={`f-input${errors.lng ? ' err' : ''}`}/>
-            {errors.lng && <p className="err-msg">{errors.lng[0]}</p>}
-          </div>
-        </div>
-        <div>
-          <label className="f-label">Nama Lokasi</label>
-          <input value={form.location_text} onChange={e => set('location_text', e.target.value)}
-            placeholder="Contoh: Kalimantan Tengah, Kab. Kotawaringin" className="f-input"/>
-        </div>
-        <div style={{ display:'flex', alignItems:'flex-start', gap:9,
-          background:'rgba(14,165,233,.06)', border:'1px solid rgba(14,165,233,.12)',
-          borderRadius:12, padding:'11px 14px' }}>
-          <Info size={14} color='#0ea5e9' style={{ flexShrink:0, marginTop:1 }}/>
-          <p style={{ fontFamily:"'DM Sans',sans-serif", fontSize:12.5, color:C.textMd, lineHeight:1.55 }}>
-            Klik <strong>Deteksi Otomatis</strong> atau salin koordinat dari Google Maps.
-          </p>
-        </div>
-      </div>
-    );
-  }
-
-  /* ─── Right column summary card — mirrors DonatePage SummaryCard ── */
-  function PreviewCard() {
-    return (
-      <div style={{ background:C.green, borderRadius:22, padding:'28px',
-        position:'relative', overflow:'hidden' }}>
-        <div style={{ position:'absolute', right:-40, top:-40,
-          width:160, height:160, borderRadius:'50%',
-          background:'rgba(181,226,53,.07)', pointerEvents:'none' }}/>
-
-        <p style={{ fontFamily:"'DM Sans',sans-serif", fontSize:11,
-          color:'rgba(255,255,255,.35)', letterSpacing:'.8px',
-          textTransform:'uppercase', marginBottom:20 }}>
-          Pratinjau Laporan
-        </p>
-
-        {/* Title preview — mirrors "big tree count" block */}
-        <div style={{ textAlign:'center', padding:'14px 0 22px',
-          borderBottom:'1px solid rgba(255,255,255,.1)', marginBottom:20 }}>
-          {form.title ? (
-            <p style={{ fontFamily:"'Syne',sans-serif", fontSize:17, fontWeight:800,
-              color:'#fff', lineHeight:1.25, padding:'0 8px' }}>
-              {form.title}
-            </p>
-          ) : (
-            <div style={{ padding:'6px 0' }}>
-              <FileText size={40} color="rgba(255,255,255,.1)"
-                style={{ margin:'0 auto 8px', display:'block' }}/>
-              <p style={{ fontFamily:"'DM Sans',sans-serif", fontSize:13,
-                color:'rgba(255,255,255,.2)' }}>Judul belum diisi</p>
-            </div>
-          )}
-        </div>
-
-        {/* Summary rows — mirrors DonatePage */}
-        <div style={{ display:'flex', flexDirection:'column', gap:11, marginBottom:20 }}>
-          {[
-            { l:'Jenis',     v:`${activeType?.emoji} ${activeType?.label}`           },
-            { l:'Keparahan', v: activeSev?.label,   color: activeSev?.color          },
-            { l:'Lokasi',    v: form.location_text || (form.lat ? `${form.lat}, ${form.lng}` : '—') },
-          ].map(({ l, v, color }) => (
-            <div key={l} style={{ display:'flex', justifyContent:'space-between', alignItems:'center', gap:12 }}>
-              <span style={{ fontFamily:"'DM Sans',sans-serif", fontSize:13,
-                color:'rgba(255,255,255,.4)', flexShrink:0 }}>{l}</span>
-              <span style={{ fontFamily:"'DM Sans',sans-serif", fontSize:13.5,
-                fontWeight:600, color: color ?? 'rgba(255,255,255,.75)',
-                textAlign:'right', overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap' }}>
-                {v || '—'}
-              </span>
-            </div>
-          ))}
-          {/* Data tambahan rows */}
-          {(form.area_affected || form.trees_lost) && (
-            <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:10, marginTop:6 }}>
-              {form.area_affected && (
-                <div style={{ background:'rgba(255,255,255,.07)', borderRadius:12, padding:'12px' }}>
-                  <p style={{ fontFamily:"'Syne',sans-serif", fontSize:22, fontWeight:800,
-                    color:'#fb923c', lineHeight:1 }}>{form.area_affected}</p>
-                  <p style={{ fontFamily:"'DM Sans',sans-serif", fontSize:11,
-                    color:'rgba(255,255,255,.28)', marginTop:3 }}>hektar</p>
-                </div>
-              )}
-              {form.trees_lost && (
-                <div style={{ background:'rgba(255,255,255,.07)', borderRadius:12, padding:'12px' }}>
-                  <p style={{ fontFamily:"'Syne',sans-serif", fontSize:22, fontWeight:800,
-                    color:'#f87171', lineHeight:1 }}>{parseInt(form.trees_lost).toLocaleString('id')}</p>
-                  <p style={{ fontFamily:"'DM Sans',sans-serif", fontSize:11,
-                    color:'rgba(255,255,255,.28)', marginTop:3 }}>pohon hilang</p>
-                </div>
-              )}
-            </div>
-          )}
-        </div>
-
-        {/* Trust — mirrors DonatePage */}
-        <div style={{ borderTop:'1px solid rgba(255,255,255,.1)', paddingTop:16 }}>
-          {['✅ Diverifikasi tim kami','📡 Diteruskan ke otoritas','🌿 Tercatat transparan'].map(t => (
-            <p key={t} style={{ fontFamily:"'DM Sans',sans-serif", fontSize:12.5,
-              color:'rgba(255,255,255,.35)', marginBottom:7 }}>{t}</p>
-          ))}
-        </div>
-      </div>
-    );
-  }
-
-  /* ═══════════════ RENDER ════════════════════════════════════ */
   return (
     <>
       <style>{CSS}</style>
 
-      {/* ── HERO — identical structure to DonatePage ── */}
+      {/* ── HERO ── */}
       <div style={{ position:'relative', overflow:'hidden', background:C.green }}>
         <img
           src="https://images.unsplash.com/photo-1542601906990-b4d3fb778b09?w=1400&auto=format&fit=crop&q=80"
@@ -388,27 +386,15 @@ export default function ReportPage() {
         />
         <div style={{ position:'absolute', inset:0,
           background:'linear-gradient(105deg,rgba(27,58,43,.97) 0%,rgba(27,58,43,.88) 40%,rgba(27,58,43,.5) 100%)' }}/>
-
         <div style={{ maxWidth:1100, margin:'0 auto', position:'relative', zIndex:1 }}>
           <div style={{ height:80 }}/>
           <div className="fu d1 hero-wrap" style={{ padding:'16px 60px 52px' }}>
-
-            {/* Alert badge
-            <div style={{ display:'inline-flex', alignItems:'center', gap:7,
-              background:'rgba(239,68,68,.15)', border:'1px solid rgba(239,68,68,.22)',
-              borderRadius:99, padding:'5px 14px', marginBottom:16 }}>
-              <AlertTriangle size={12} color='#f87171'/>
-              <span style={{ fontFamily:"'DM Sans',sans-serif", fontSize:12,
-                color:'#f87171', fontWeight:600 }}>Laporan Kerusakan Hutan</span>
-            </div> */}
-
             <h1 className="fu d1 hero-title" style={{
               fontFamily:"'Syne',sans-serif", fontWeight:800, fontSize:60,
               lineHeight:.96, letterSpacing:'-2.5px', color:'#fff', marginBottom:24,
             }}>
               Buat Laporan,<br/><span style={{ color:C.lime }}>Sekarang</span>
             </h1>
-
             <div className="hero-stats" style={{ display:'flex', gap:28, flexWrap:'wrap' }}>
               {[
                 { v:'12.400+', l:'Laporan Terkirim' },
@@ -427,7 +413,7 @@ export default function ReportPage() {
         </div>
       </div>
 
-      {/* ── MAIN CONTENT — same grid as DonatePage ── */}
+      {/* ── MAIN CONTENT ── */}
       <div style={{ background:C.offWhite }}>
         <div className="page-wrap" style={{ maxWidth:1100, margin:'0 auto', padding:'32px 60px 80px' }}>
           <form ref={formRef} onSubmit={submit}>
@@ -435,10 +421,10 @@ export default function ReportPage() {
               display:'grid', gridTemplateColumns:'1fr 370px', gap:28, alignItems:'start',
             }}>
 
-              {/* ═══ LEFT — form fields (no submit button here) ═══ */}
+              {/* ═══ LEFT ═══ */}
               <div style={{ display:'flex', flexDirection:'column', gap:18 }}>
 
-                {/* Mobile progress bar */}
+                {/* Mobile progress */}
                 <div className="mob-only" style={{ marginBottom:2 }}>
                   <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom:8 }}>
                     <span style={{ fontFamily:"'DM Sans',sans-serif", fontSize:12, color:C.textLt }}>
@@ -464,17 +450,24 @@ export default function ReportPage() {
                   <div style={{ display:'flex', flexDirection:'column', gap:14 }}>
                     <div>
                       <label className="f-label">Judul Laporan <span style={{ color:'#ef4444' }}>*</span></label>
-                      <input value={form.title} onChange={e => set('title', e.target.value)}
+                      <input
+                        value={form.title}
+                        onChange={e => set('title', e.target.value)}
                         placeholder="Contoh: Pembukaan lahan sawit ilegal di Kalimantan Tengah"
-                        className={`f-input${errors.title ? ' err' : ''}`}/>
+                        className={`f-input${errors.title ? ' err' : ''}`}
+                      />
                       {errors.title && <p className="err-msg">{errors.title[0]}</p>}
                     </div>
                     <div>
                       <label className="f-label">Deskripsi <span style={{ color:'#ef4444' }}>*</span></label>
-                      <textarea value={form.description} onChange={e => set('description', e.target.value)}
-                        rows={4} placeholder="Kapan terjadi, seberapa parah, ada alat berat atau tidak..."
+                      <textarea
+                        value={form.description}
+                        onChange={e => set('description', e.target.value)}
+                        rows={4}
+                        placeholder="Kapan terjadi, seberapa parah, ada alat berat atau tidak..."
                         className={`f-input${errors.description ? ' err' : ''}`}
-                        style={{ resize:'vertical', minHeight:100 }}/>
+                        style={{ resize:'vertical', minHeight:100 }}
+                      />
                       {errors.description && <p className="err-msg">{errors.description[0]}</p>}
                     </div>
                   </div>
@@ -523,7 +516,7 @@ export default function ReportPage() {
                   </div>
                 </div>
 
-                {/* 3. Lokasi — desktop always visible */}
+                {/* 3. Lokasi — desktop */}
                 <div className="s-card fu d1 desk-cta">
                   <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom:18 }}>
                     <div className="s-head" style={{ marginBottom:0 }}>
@@ -536,7 +529,14 @@ export default function ReportPage() {
                       <Locate size={14}/>{geoLoading ? 'Mendeteksi…' : 'Deteksi Otomatis'}
                     </button>
                   </div>
-                  <LocationFields/>
+                  {/* ✅ Passing props — tidak lagi nested function definition */}
+                  <LocationFields
+                    form={form}
+                    set={set}
+                    errors={errors}
+                    geoLoading={geoLoading}
+                    detectLocation={detectLocation}
+                  />
                 </div>
 
                 {/* 3. Lokasi — mobile collapsible */}
@@ -573,7 +573,14 @@ export default function ReportPage() {
                   {showInfo && (
                     <div style={{ padding:'0 20px 20px', borderTop:`1px solid ${C.border}` }}>
                       <div style={{ height:14 }}/>
-                      <LocationFields/>
+                      {/* ✅ Passing props */}
+                      <LocationFields
+                        form={form}
+                        set={set}
+                        errors={errors}
+                        geoLoading={geoLoading}
+                        detectLocation={detectLocation}
+                      />
                     </div>
                   )}
                 </div>
@@ -633,7 +640,7 @@ export default function ReportPage() {
                   </p>
                 </div>
 
-                {/* 5. Data Tambahan — collapsible */}
+                {/* 5. Data Tambahan */}
                 <div className="s-card fu d2" ref={extraRef}>
                   <button type="button"
                     style={{ width:'100%', display:'flex', alignItems:'center',
@@ -689,13 +696,13 @@ export default function ReportPage() {
               </div>
               {/* END LEFT */}
 
-              {/* ═══ RIGHT — sticky preview + submit (desktop only) ═══ */}
+              {/* ═══ RIGHT ═══ */}
               <div className="right-col" style={{ position:'sticky', top:96,
                 display:'flex', flexDirection:'column', gap:16 }}>
 
-                <PreviewCard/>
+                {/* ✅ Passing props ke PreviewCard */}
+                <PreviewCard form={form} activeType={activeType} activeSev={activeSev} />
 
-                {/* Submit button — ONLY here, not in left column */}
                 <button type="submit" className="btn-submit" disabled={loading}>
                   {loading
                     ? 'Mengirim…'
@@ -714,15 +721,11 @@ export default function ReportPage() {
         </div>
       </div>
 
-      {/* ════════════════════════════════════════════════════════
-          MOBILE STICKY FOOTER — identical to DonatePage
-      ════════════════════════════════════════════════════════ */}
+      {/* ── MOBILE STICKY FOOTER ── */}
       <div className="mob-footer">
-        {/* Mini summary row */}
         <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between',
           marginBottom:10, padding:'0 2px' }}>
           <div style={{ display:'flex', alignItems:'center', gap:8 }}>
-            {/* Severity badge */}
             <span style={{ display:'inline-flex', alignItems:'center', gap:4,
               background:activeSev?.bg, color:activeSev?.color,
               borderRadius:99, padding:'4px 10px',
@@ -734,7 +737,6 @@ export default function ReportPage() {
               {activeType?.emoji} {activeType?.label}
             </span>
           </div>
-          {/* Progress dots */}
           <div style={{ display:'flex', gap:4 }}>
             {progress.map((done, i) => (
               <span key={i} style={{ width:8, height:8, borderRadius:'50%',
@@ -743,7 +745,6 @@ export default function ReportPage() {
           </div>
         </div>
 
-        {/* Submit button */}
         <button type="button" className="btn-submit"
           style={{ fontSize:15.5, padding:'15px 15px 15px 26px' }}
           onClick={() => formRef.current?.requestSubmit()}
