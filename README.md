@@ -15,11 +15,11 @@ The React Compiler is not enabled on this template because of its impact on dev 
 
 If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
 
-
+## Role Akses
 untuk akses user role gunakan pada aplikasi ini adalah:
-======role = user:
+- role = user:
 lakukan registrasi pada aplikasi yang
 
-======role = admin:
+- role = admin:
 masukkan email:admin@forestguardian.id
 masukkan password:password
